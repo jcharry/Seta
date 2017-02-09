@@ -1,0 +1,10 @@
+node_modules
+npm-debug.log
+.DS_Store
+*.swp
+app/creds/*
+server/creds
+config/*.env
+*notes*
+NFLData.json
+*.log
