@@ -1,0 +1,27 @@
+.primatives-panel-list-item {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem 1rem;
+
+    &:hover {
+        background-color: $list-item-hover-color;
+        cursor: pointer;
+    }
+
+    img {
+        width: 40px;
+        height: 40px;
+    }
+    p {
+        padding-left: 10px;
+    }
+
+    &.active {
+        background-color: $list-item-active-color;
+    }
+
+    &:last-child {
+        margin-bottom: 1rem;
+    }
+}
+

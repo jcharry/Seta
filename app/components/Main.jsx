@@ -5,23 +5,23 @@
  * Distributed under terms of the MIT license.
  */
 import React from 'react';
-import MenuBar from 'components/MenuBar/MenuBar';
+import MenuPanel from 'components/MenuPanel/MenuPanel';
 // import TextEditor from './TextEditor';
-import GameContainer from 'components/GamePanel/GameContainer';
-import ObjectsMenu from 'components/ObjectsPanel/ObjectsMenu';
-import PropertiesMenu from 'components/PropertiesPanel/PropertiesMenu';
+import GamePanel from 'components/GamePanel/GamePanel';
+import PrimativesPanel from 'components/PrimativesPanel/PrimativesPanel';
+import PropertiesPanel from 'components/PropertiesPanel/PropertiesPanel';
 
 class Main extends React.Component {
     render() {
         return (
             <div className='main'>
                 <div className='top'>
-                    <MenuBar />
+                    <MenuPanel />
                 </div>
                 <div className='bottom'>
-                    <ObjectsMenu />
-                    <GameContainer />
-                    <PropertiesMenu />
+                    <PrimativesPanel />
+                    <GamePanel />
+                    <PropertiesPanel />
                     {/* <TextEditor /> */}
                 </div>
             </div>

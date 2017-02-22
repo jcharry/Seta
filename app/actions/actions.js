@@ -1,12 +1,16 @@
 // import axios from 'axios';
 
-export const addBody = (body) => ({
+export const addBody = body => ({
     type: 'ADD_BODY',
     body
 });
-export const removeBody = (id) => ({
+export const removeBody = id => ({
     type: 'REMOVE_BODY',
     id
+});
+
+export const clearBodies = () => ({
+    type: 'CLEAR_BODIES'
 });
 
 export const setIsPlaying = status => ({
@@ -38,3 +42,27 @@ export const stopLoading = function() {
         type: 'STOP_LOADING'
     };
 };
+
+export const setPrimativesPanelSelection = id => ({
+    type: 'SET_PRIMATIVES_PANEL_SELECTION',
+    id
+});
+
+export const needsRestart = shouldRestart => ({
+    type: 'NEEDS_RESTART',
+    shouldRestart
+});
+
+export const addGameState = id => ({
+    type: 'ADD_GAME_STATE',
+    id
+});
+export const needsNewGameState = needsNewState => ({
+    type: 'NEEDS_NEW_GAME_STATE',
+    needsNewState
+});
+
+export const activateGameState = id => ({
+    type: 'ACTIVATE_GAME_STATE',
+    id
+});

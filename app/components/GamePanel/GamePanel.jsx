@@ -6,6 +6,7 @@
  */
 import React from 'react';
 import GameCanvas from 'components/GamePanel/GameCanvas';
+import StatePanel from 'components/StatePanel/StatePanel';
 
 class GameContainer extends React.Component {
     componentDidMount() {
@@ -14,7 +15,8 @@ class GameContainer extends React.Component {
 
     render() {
         return (
-            <div className='game-container'>
+            <div className='game-panel panel'>
+                <StatePanel />
                 <GameCanvas />
             </div>
         );

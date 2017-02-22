@@ -1,0 +1,43 @@
+.state-panel {
+    display: flex;
+    // flex-wrap: nowrap;
+    align-items: center;
+    min-width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    // flex: 1 0 10%;
+    box-sizing: border-box;
+    padding: 0 1rem;
+
+    h2 {
+        margin: 0;
+    }
+
+    button {
+        box-sizing: border-box;
+    }
+    button:last-child {
+        color: white;
+        border: none;
+        background-color: orange;
+        flex: 0 0 50px;
+        font-size: 1rem;
+        padding: 0 1rem;
+        border: 1px solid orange;
+    }
+    
+
+    .game-state-button {
+        flex: 0 0 auto;
+        background: transparent;
+        border: none;
+        font-size: 1rem;
+        border: 1px solid $list-item-active-color;
+        padding: 0 1rem;
+        margin: 0 0.2rem;
+        &.active {
+            background-color: $list-item-active-color;
+            color: white;
+        }
+    }
+}

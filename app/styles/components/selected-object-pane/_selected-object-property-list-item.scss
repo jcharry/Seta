@@ -1,0 +1,12 @@
+.selected-object-property-list-item {
+    display: flex;
+    padding: 0.5rem;
+    justify-content: space-between;
+
+    p {
+        margin: 0;
+    }
+    input {
+        max-width: 50px;
+    }
+}

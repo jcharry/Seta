@@ -1,0 +1,11 @@
+@import '../selected-object-pane/selected-object-pane';
+@import '../objects-list/objects-list';
+
+.properties-panel {
+    flex: 1 0 15%;
+    // overflow-y: auto;
+
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: flex-start;
+}

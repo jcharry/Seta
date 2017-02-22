@@ -34,7 +34,8 @@ module.exports = {
             components: path.resolve(__dirname, 'app', 'components'),
             actions: path.resolve(__dirname, 'app', 'actions', 'actions.js'),
             app: path.resolve(__dirname, 'app'),
-            images: path.resolve(__dirname, 'app', 'images')
+            images: path.resolve(__dirname, 'app', 'images'),
+            utils: path.resolve(__dirname, 'app', 'utils')
         },
         extensions: ['.js', '.jsx', '.css', '.scss']
     },
@@ -66,7 +67,7 @@ module.exports = {
             },
             {
                 test: /\.css/,
-                loader: 'style-loader!css-loader!postcss-loader'
+                loaders: ['style-loader', 'css-loader', 'postcss-loader']
             },
             {
                 test: /\.json$/,

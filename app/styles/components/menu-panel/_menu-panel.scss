@@ -1,0 +1,36 @@
+.menu-panel {
+    // height: 50px;
+    // width: 100vw;
+    // margin: 0;
+    // padding: 0;
+    min-height: 100px;
+    display: flex;
+    justify-content: space-between;
+
+    .menu-left, .menu-right {
+        display: flex;
+        align-items: baseline;
+    }
+
+    .menu-left h1 {
+        font-family: 'Barrio', cursive;
+    }
+    .menu-left h1:hover {
+        opacity: 0.7;
+        cursor: default;
+    }
+    .menu-left p:hover {
+        opacity: 0.7;
+        cursor: pointer;
+    }
+
+    h1, h2, p {
+        padding: 1rem;
+        margin: 0;
+    }
+
+    .menu-panel-button {
+        background-color: transparent;
+        border: none;
+    }
+}

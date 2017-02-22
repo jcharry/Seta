@@ -2,14 +2,27 @@
 import * as redux from 'redux';
 import thunk from 'redux-thunk';
 
-import { loadingReducer, selectedObjectReducer, isPlayingReducer, bodiesReducer } from '../reducers/reducers';
+import {
+    loadingReducer,
+    selectedObjectReducer,
+    isPlayingReducer,
+    bodiesReducer,
+    primativesPanelSelectionReducer,
+    needsRestartReducer,
+    gameStatesReducer,
+    needsNewGameStateReducer
+} from '../reducers/reducers';
 
 const configure = (initialState = {}) => {
     const reducer = redux.combineReducers({
         isLoading: loadingReducer,
         selectedObject: selectedObjectReducer,
         isPlaying: isPlayingReducer,
-        bodies: bodiesReducer
+        bodies: bodiesReducer,
+        primativesPanelSelection: primativesPanelSelectionReducer,
+        needsRestart: needsRestartReducer,
+        gameStates: gameStatesReducer,
+        needsNewGameState: needsNewGameStateReducer
     });
 
     const store = redux.createStore(reducer, initialState, redux.compose(
