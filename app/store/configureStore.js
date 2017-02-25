@@ -10,7 +10,8 @@ import {
     primativesPanelSelectionReducer,
     needsRestartReducer,
     gameStatesReducer,
-    needsNewGameStateReducer
+    needsNewGameStateReducer,
+    propertiesPanelNeedsRefreshReducer
 } from '../reducers/reducers';
 
 const configure = (initialState = {}) => {
@@ -22,7 +23,8 @@ const configure = (initialState = {}) => {
         primativesPanelSelection: primativesPanelSelectionReducer,
         needsRestart: needsRestartReducer,
         gameStates: gameStatesReducer,
-        needsNewGameState: needsNewGameStateReducer
+        needsNewGameState: needsNewGameStateReducer,
+        propertiesPanelNeedsRefresh: propertiesPanelNeedsRefreshReducer
     });
 
     const store = redux.createStore(reducer, initialState, redux.compose(

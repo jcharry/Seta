@@ -11,7 +11,6 @@ class SelectedObjectPaneProperty extends React.Component {
         console.log(e.key);
         if (parseInt(e.key) || e.key === '.') {
             console.log(e.key);
-            debugger;
             this.props.handleChange(e);
         } else {
             console.warn('not a valid key');
@@ -27,12 +26,15 @@ class SelectedObjectPaneProperty extends React.Component {
                         return <input type='text' key={prop} onChange={handleChange} name={`${label}:${prop}`} value={value[prop]} />;
                     });
                 }
+
                 case 'number':
-                case 'string':
-                // case 'number':
-                    return <input type='text' onChange={handleChange} name={label} value={value === Infinity ? 0 : value} />;
-                case 'boolean':
-                    return <input type='checkbox' name={label} checked={value} onChange={handleChange} />;
+                case 'string': {
+                    return (<input type='text' onChange={handleChange} name={label} value={value === Infinity ? 0 : value} />);
+                }
+
+                case 'boolean': {
+                    return (<input type='checkbox' name={label} checked={value} onChange={handleChange} />);
+                }
                 default:
                     break;
             }

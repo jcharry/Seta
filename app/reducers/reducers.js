@@ -116,3 +116,11 @@ export const needsNewGameStateReducer = (state = false, action) => {
             return state;
     }
 };
+export const propertiesPanelNeedsRefreshReducer = (state = false, action) => {
+    switch (action.type) {
+        case 'PROPERTIES_PANEL_NEEDS_REFRESH':
+            return action.needsRefresh;
+        default:
+            return state;
+    }
+};

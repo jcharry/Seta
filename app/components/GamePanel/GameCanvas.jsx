@@ -26,6 +26,9 @@ class GameCanvas extends React.Component {
         this.initializeEventListeners = this.initializeEventListeners.bind(this);
         this.refresh = this.refresh.bind(this);
         this.cleanupScene = this.cleanupScene.bind(this);
+        this.pan = this.pan.bind(this);
+
+        this.selectedBodyForConstraint = null;
 
         // TODO: Store globally for now...
         window.Matter = Matter;
@@ -37,11 +40,33 @@ class GameCanvas extends React.Component {
         const { width, height } = this.container.getBoundingClientRect();
         this.canvas.width = width;
         this.canvas.height = height;
+        this.renderBounds = {
+            min: {
+                x: 0,
+                y: 0
+            },
+            max: {
+                x: width,
+                y: height
+            }
+        };
 
         this.ctx = this.canvas.getContext('2d');
 
         // Capture Matter.Mouse for user interaction
         this.mouse = Matter.Mouse.create(this.canvas);
+        this.mouseConstraint = Matter.MouseConstraint.create(this.engine, {
+            mouse: this.mouse,
+            constraint: {
+                stiffness: 1
+            }
+        });
+
+        Matter.World.add(this.engine.world, this.mouseConstraint);
+        this.engine.world.bounds.min.x = -300;
+        this.engine.world.bounds.min.y = -300;
+        this.engine.world.bounds.max.x = width + 300;
+        this.engine.world.bounds.max.y = height + 300;
 
         // create a renderer
         // this.renderMatter = Matter.Render.create({
@@ -75,11 +100,11 @@ class GameCanvas extends React.Component {
         //     }
         // });
 
-        // this.renderMatter.mouse = this.mouse;
         this.gameStates = {};
         const initialGameState = new GameState(this.engine.world, dispatch);
         this.gameStates[initialGameState.id] = initialGameState;
         this.activeState = initialGameState;
+        this.activeState.constraints.push(this.mouseConstraint);
         dispatch(actions.addGameState(initialGameState.id));
         // console.log(gameState);
         // this.gameStates.push({
@@ -114,7 +139,7 @@ class GameCanvas extends React.Component {
 
     componentDidUpdate(prevProps) {
         console.log('canvas did update');
-        const { needsRestart, needsNewGameState, gameStates } = this.props;
+        const { needsRestart, needsNewGameState, gameStates, primativesPanelSelection } = this.props;
 
         // Update all bodies on a stage reset
         if (prevProps.needsRestart !== needsRestart && needsRestart) {
@@ -130,6 +155,16 @@ class GameCanvas extends React.Component {
         if (!_.isEqual(prevProps.gameStates, gameStates)) {
             console.log('should switch game states');
             this.switchGameState();
+        }
+
+        // If the Selected Primative is changed and it's not a constraint,
+        // clear out this. to ensure we dont' keep drawing the temporary
+        // constraint
+        if (!_.isEqual(prevProps.primativesPanelSelection, primativesPanelSelection) &&
+            primativesPanelSelection !== 'Rope' &&
+            primativesPanelSelection !== 'Spring' &&
+            primativesPanelSelection !== 'Rod') {
+                this.selectedBodyForConstraint = null;
         }
         // let prevGameState = prevProps.gameStates.filter(gs => {
         //     return gs.active;
@@ -227,7 +262,6 @@ class GameCanvas extends React.Component {
         // this.activeState = gameStates.filter(gs => {
         //     return gs.active;
         // })[0];
-        // debugger;
         // gameStates.forEach(gs => {
         //     // if (gs.id === stateId);
         // });
@@ -245,13 +279,24 @@ class GameCanvas extends React.Component {
      * Set up all event listeners for canvas interactions
     */
     initializeEventListeners() {
+        const { dispatch } = this.props;
+        console.log('initializing event listeners');
+        // If the mouse is dragging, i.e this.isMouseDown = true
+        // and mouse is moving, then query for bodies, and update positions
+        // TODO: figure out how to force the properties panel to re-render
+
+        // Capture body on mousedown to be dragged in mousemove
+        let draggableBody;
+        let mouseoffsetX = 0;
+        let mouseoffsetY = 0;
         this.canvas.addEventListener('mousedown', () => {
             const { dispatch, primativesPanelSelection } = this.props;
-            console.log(this.mouse.mousedownPosition);
+            this.isMouseDown = true;
+            console.log('mousedown at ', this.mouse.mousedownPosition);
 
             // Handle a few different cases
             // 1. If user clicks while an object is selected in the left panel,
-            //    then add the body to the world
+            // Add primative body
             if (primativesPanelSelection === 'Rectangle' || primativesPanelSelection === 'Circle') {
                 // Add the body to the world
                 const body = physicsUtils.bodyFactory(
@@ -261,19 +306,149 @@ class GameCanvas extends React.Component {
                     }
                 );
                 this.activeState.addBody(body, this.props.isPlaying);
-            } else {
-                // 2. If nothing is selected in any panel, then query for Matter
-                //    Bodies already in the world.
+            }
+
+            // 2. Add constraints
+            else if (primativesPanelSelection === 'Rope' || primativesPanelSelection === 'Spring' || primativesPanelSelection === 'Rod'){
+                // 2. Add constraints to 2 bodies.  Have to query bodies
+                // Need to know if it's the first or second click.  When we
+                // register a body on click, keep track of the pair
+                console.log('constraint selected');
                 const bodies = Matter.Query.point(this.activeState.bodies, this.mouse.mousedownPosition);
                 if (bodies.length > 0) {
                     const b = bodies[0];
-                    console.log(b);
+                    if (this.selectedBodyForConstraint) {
+                        // Second body selected, add constraint, clear out
+                        // selected body
+                        if (b !== this.selectedBodyForConstraint) {
+                            let c = this.activeState.addConstraint(primativesPanelSelection, this.selectedBodyForConstraint, b);
+                            // Matter.World.add(this.engine.world, c);
+                            this.selectedBodyForConstraint = null;
+                        }
+                    } else {
+                        this.selectedBodyForConstraint = b;
+                    }
+                }
+            }
+
+            // 3. Nothing Selected, query for bodies
+            else {
+                const bodies = Matter.Query.point(this.activeState.bodies, this.mouse.mousedownPosition);
+                if (bodies.length > 0) {
+                    const b = bodies[0];
+                    draggableBody = b;
+                    mouseoffsetX = this.mouse.mousedownPosition.x - b.position.x;
+                    mouseoffsetY = this.mouse.mousedownPosition.y - b.position.y;
                     dispatch(actions.setSelectedObject(b.id));
                 } else {
                     dispatch(actions.setSelectedObject(-1));
                 }
             }
         });
+
+        this.canvas.addEventListener('mousemove', () => {
+            if (this.isMouseDown) {
+                if (draggableBody) {
+                    physicsUtils.setInitialProperty(draggableBody, 'position', {x: this.mouse.position.x - mouseoffsetX, y: this.mouse.position.y - mouseoffsetY});
+                    dispatch(actions.propertiesPanelNeedsRefresh(true));
+                }
+            }
+        });
+        this.canvas.addEventListener('mouseup', () => {
+            this.isMouseDown = false;
+            this.isMouseDragging = false;
+            draggableBody = null;
+        });
+
+
+
+        let boundsScaleTarget = 1,
+            boundsScale = {
+                x: 1,
+                y: 1
+            };
+
+        Matter.Events.on(this.engine, 'beforeTick', function() {
+            console.log('beforetick');
+            const world = this.engine.world,
+                mouse = this.mouseConstraint.mouse;
+            let translate;
+
+            // mouse wheel controls zoom
+            // const scaleFactor = mouse.wheelDelta * -0.1;
+            // if (scaleFactor !== 0) {
+            //     if ((scaleFactor < 0 && boundsScale.x >= 0.6) || (scaleFactor > 0 && boundsScale.x <= 1.4)) {
+            //         boundsScaleTarget += scaleFactor;
+            //     }
+            // }
+            //
+            // // if scale has changed
+            // if (Math.abs(boundsScale.x - boundsScaleTarget) > 0.01) {
+            //     // smoothly tween scale factor
+            //     scaleFactor = (boundsScaleTarget - boundsScale.x) * 0.2;
+            //     boundsScale.x += scaleFactor;
+            //     boundsScale.y += scaleFactor;
+            //
+            //     // scale the this.renderBounds
+            //     this.renderBounds.max.x = render.bounds.min.x + render.options.width * boundsScale.x;
+            //     this.renderBounds.max.y = render.bounds.min.y + render.options.height * boundsScale.y;
+            //
+            //     // translate so zoom is from centre of view
+            //     translate = {
+            //         x: render.options.width * scaleFactor * -0.5,
+            //         y: render.options.height * scaleFactor * -0.5
+            //     };
+            //
+            //     Bounds.translate(this.renderBounds, translate);
+            //
+            //     // update mouse
+            //     Mouse.setScale(mouse, boundsScale);
+            //     Mouse.setOffset(mouse, this.renderBounds.min);
+            // }
+            //
+            // // get vector from mouse relative to centre of viewport
+
+            // translate the view if mouse has moved over 50px from the centre of viewport
+        });
+    }
+
+    pan() {
+        const viewportCentre = {
+            x: this.canvas.width / 2,
+            y: this.canvas.height / 2
+        };
+        let translate;
+        const world = this.engine.world;
+        var deltaCentre = Matter.Vector.sub(this.mouse.absolute, viewportCentre),
+            centreDist = Matter.Vector.magnitude(deltaCentre);
+
+        if (centreDist > 50) {
+            // create a vector to translate the view, allowing the user to control view speed
+            var direction = Matter.Vector.normalise(deltaCentre),
+                speed = Math.min(10, Math.pow(centreDist - 50, 2) * 0.0002);
+
+            translate = Matter.Vector.mult(direction, speed);
+
+            // prevent the view moving outside the world bounds
+            if (this.renderBounds.min.x + translate.x < world.bounds.min.x)
+                translate.x = world.bounds.min.x - this.renderBounds.min.x;
+
+            if (this.renderBounds.max.x + translate.x > world.bounds.max.x)
+                translate.x = world.bounds.max.x - this.renderBounds.max.x;
+
+            if (this.renderBounds.min.y + translate.y < world.bounds.min.y)
+                translate.y = world.bounds.min.y - this.renderBounds.min.y;
+
+            if (this.renderBounds.max.y + translate.y > world.bounds.max.y)
+                translate.y = world.bounds.max.y - this.renderBounds.max.y;
+
+            // move the view
+            Matter.Bounds.translate(this.renderBounds, translate);
+
+            // we must update the mouse too
+            Matter.Mouse.setOffset(this.mouse, this.renderBounds.min);
+            this.ctx.translate(-translate.x, -translate.y);
+        }
     }
 
     /**
@@ -308,6 +483,16 @@ class GameCanvas extends React.Component {
         }
     }
 
+    drawTemporaryConstraint() {
+        if (this.selectedBodyForConstraint) {
+            this.ctx.beginPath();
+            this.ctx.moveTo(this.selectedBodyForConstraint.position.x, this.selectedBodyForConstraint.position.y);
+            this.ctx.lineTo(this.mouse.position.x, this.mouse.position.y);
+            this.ctx.strokeStyle = 'red';
+            this.ctx.stroke();
+        }
+    }
+
     /**
      * Handle different rendering cases for PrimativePanel Selection
     */
@@ -335,24 +520,35 @@ class GameCanvas extends React.Component {
     renderCanvas() {
         const { isPlaying, primativesPanelSelection, selectedObject } = this.props;
 
+        // clear the canvas with a transparent fill, to allow the canvas background to show
+        let worldX = this.engine.world.bounds.min.x;
+        let worldY = this.engine.world.bounds.min.y;
+        let worldWidth = this.engine.world.bounds.max.x - worldX;
+        let worldHeight = this.engine.world.bounds.max.y - worldY;
+
+        this.ctx.globalCompositeOperation = 'source-in';
+        this.ctx.fillStyle = "transparent";
+        this.ctx.fillRect(worldX, worldY, worldWidth, worldHeight);
+        this.ctx.globalCompositeOperation = 'source-over';
+
         this.ctx.fillStyle = '#fff';
-        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        this.ctx.fillRect(worldX, worldY, worldWidth, worldHeight);
 
         if (isPlaying) {
             this.updateEngine(16.666);
         }
 
 
-        for (let i = 0; i < this.activeState.bodies.length; i += 1) {
+        for (let i = 0; i < this.activeState.bodies.length; i++) {
             this.ctx.beginPath();
             const body = this.activeState.bodies[i];
+            this.ctx.strokeStyle = body.render.strokeStyle;
+            this.ctx.lineWidth = 1;
             if (body.id === selectedObject) {
                 this.ctx.strokeStyle = 'green';
                 this.ctx.lineWidth = 3;
-            } else {
-                this.ctx.strokeStyle = body.render.strokeStyle;
-                this.ctx.lineWidth = 1;
             }
+
             const vertices = body.vertices;
 
             this.ctx.moveTo(vertices[0].x, vertices[0].y);
@@ -366,12 +562,33 @@ class GameCanvas extends React.Component {
             this.ctx.stroke();
         }
 
+        for (let i = 0; i < this.activeState.constraints.length; i++) {
+            let c = this.activeState.constraints[i];
+            if (c.type !== 'mouseConstraint') {
+                this.ctx.beginPath();
+                this.ctx.moveTo(c.bodyA.position.x, c.bodyA.position.y);
+                this.ctx.lineTo(c.bodyB.position.x, c.bodyB.position.y);
+                this.ctx.strokeStyle = 'red';
+                this.ctx.lineWidth = 1;
+                if (c.id === selectedObject) {
+                    this.ctx.strokeStyle = 'green';
+                    this.ctx.lineWidth = 3;
+                }
+                this.ctx.stroke();
+            }
+        }
+
         // this.ctx.strokeStyle = '#333';
 
         if (primativesPanelSelection !== '') {
             this.drawSelectedObject();
         }
 
+        if (this.selectedBodyForConstraint) {
+            this.drawTemporaryConstraint();
+        }
+
+        this.pan();
         window.requestAnimationFrame(this.renderCanvas);
     }
 
@@ -399,7 +616,7 @@ GameCanvas.propTypes = {
     needsRestart: React.PropTypes.bool.isRequired,
     selectedObject: React.PropTypes.number,
     needsNewGameState: React.PropTypes.bool.isRequired,
-    gameStates: React.PropTypes.array.isRequired
+    gameStates: React.PropTypes.object.isRequired
     // bodies: React.PropTypes.object
 };
 

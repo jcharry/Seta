@@ -8,11 +8,12 @@ class PropertiesPanel extends React.Component {
     render() {
         const { selectedObject, bodies } = this.props;
         const selectedBody = selectedObject === -1 ? null : bodies[selectedObject];
+        console.log('properties panel', selectedBody);
 
         return (
             <div className='panel properties-panel'>
                 <ObjectsList bodies={bodies} />
-                {selectedBody && <SelectedObjectPane body={selectedBody} /> }
+                {selectedBody && <SelectedObjectPane selectedObj={selectedBody} /> }
             </div>
         );
     }
@@ -25,5 +26,6 @@ PropertiesPanel.propTypes = {
 
 export default connect(state => ({
     selectedObject: state.selectedObject,
-    bodies: state.bodies
+    bodies: state.bodies,
+    propertiesPanelNeedsRefresh: state.propertiesPanelNeedsRefresh
 }))(PropertiesPanel);

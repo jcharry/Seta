@@ -66,3 +66,7 @@ export const activateGameState = id => ({
     type: 'ACTIVATE_GAME_STATE',
     id
 });
+export const propertiesPanelNeedsRefresh = needsRefresh => ({
+    type: 'PROPERTIES_PANEL_NEEDS_REFRESH',
+    needsRefresh
+});

@@ -42,9 +42,27 @@ physicsUtils.prototype = {
         switch (type) {
             case 'Rectangle':
                 b = Matter.Bodies.rectangle(x, y, width, height);
+                b.scaleX = 1;
+                b.scaleY = 1;
+                b._creationSize = {
+                    width,
+                    height
+                };
+                b.size = {
+                    width,
+                    height
+                };
                 break;
             case 'Circle':
                 b = Matter.Bodies.circle(x, y, radius);
+                b.scaleX = 1;
+                b.scaleY = 1;
+                b._creationSize = {
+                    radius
+                };
+                b.size = {
+                    radius
+                };
                 break;
             case 'Polygon':
                 b = null;
@@ -78,11 +96,47 @@ physicsUtils.prototype = {
         p.inertia = body.inertia;
         p.angle = body.angle;
         p.angularVelocity = body.angularVelocity;
-        p.scale = 1;
+        p.scaleX = body.scaleX;
+        p.scaleY = body.scaleY;
+        p.creationSize = utils.clone(body._creationSize);
+        p.size = utils.clone(body.size);
     },
 
     setInitialProperty(body, property, value) {
-        Matter.Body.set(body, property, value);
+
+        // Size is not a Matter.Body property, but here it's being used
+        // to handle scaling objects.  Size holds the current size of the body.
+        // Initial size is kept constant on _createdSize prop.  And the current
+        // scale is held on body.scaleX and body.scaleY.  These are used
+        // to calculate amount of scaleChanged required to make the body the
+        // desired size
+        if (property === 'size') {
+            body.size = value;  //eslint-disable-line
+
+            const initialScaleX = body.scaleX,
+                initialScaleY = body.scaleY;
+
+            let targetScaleX,
+                targetScaleY;
+
+            if (value.radius) {
+                targetScaleX = value.radius / body.originalProperties.creationSize.radius;
+                targetScaleY = value.radius / body.originalProperties.creationSize.radius;
+            } else {
+                targetScaleX = value.width / body.originalProperties.creationSize.width;
+                targetScaleY = value.height / body.originalProperties.creationSize.height;
+            }
+
+            body.scaleX = targetScaleX;     //eslint-disable-line
+            body.scaleY = targetScaleY;     //eslint-disable-line
+
+            const scaleChangeX = targetScaleX / initialScaleX;
+            const scaleChangeY = targetScaleY / initialScaleY;
+            Matter.Body.scale(body, scaleChangeX, scaleChangeY);
+        } else {
+            Matter.Body.set(body, property, value);
+        }
+
         this.storeInitialState(body);
         // body.originalProperties[property] = value;
     },
