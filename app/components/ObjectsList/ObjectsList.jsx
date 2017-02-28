@@ -9,13 +9,13 @@ import ObjectsListItem from './ObjectsListItem';
 
 class ObjectsList extends React.Component {
     render() {
-        const { bodies } = this.props;
+        const { gameObjects } = this.props;
         return (
             <div className='objects-list'>
                 <h2>Active Objects</h2>
                 <ul>
-                    {Object.keys(bodies).map(key => {
-                        const body = bodies[key];
+                    {Object.keys(gameObjects).map(key => {
+                        const body = gameObjects[key];
                         return <ObjectsListItem key={body.id} body={body} />;
                     })}
                 </ul>
@@ -25,11 +25,11 @@ class ObjectsList extends React.Component {
 }
 
 ObjectsList.defaultProps = {
-    bodies: []
+    gameObjects: []
 };
 
 ObjectsList.propTypes = {
-    bodies: React.PropTypes.object
+    gameObjects: React.PropTypes.object
 };
 
 export default ObjectsList;

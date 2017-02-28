@@ -1,9 +1,14 @@
 // import axios from 'axios';
 
 export const addBody = body => ({
-    type: 'ADD_BODY',
+    type: 'ADD_OBJECT',
     body
 });
+export const addGameObject = obj => ({
+    type: 'ADD_OBJECT',
+    obj
+});
+
 export const removeBody = id => ({
     type: 'REMOVE_BODY',
     id

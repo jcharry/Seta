@@ -30,6 +30,10 @@ class SelectedObjectPane extends React.Component {
             'length'
         ];
 
+        this.visibleWorldProperties = [
+            'gravity'
+        ];
+
         this.state = {};
         switch (selectedObj.type) {
             case 'body':
@@ -39,6 +43,11 @@ class SelectedObjectPane extends React.Component {
                 break;
             case 'constraint':
                 this.visibleConstraintProperties.forEach(p => {
+                    this.state[p] = selectedObj[p];
+                });
+                break;
+            case 'composite':
+                this.visibleWorldProperties.forEach(p => {
                     this.state[p] = selectedObj[p];
                 });
                 break;
@@ -212,6 +221,11 @@ class SelectedObjectPane extends React.Component {
                     return (this.visibleBodyProperties.map(p => <SelectedObjectPaneProperty key={p} label={p} value={this.state[p]} handleChange={this.handleInputChange} />));
                 case 'constraint': {
                     return (this.visibleConstraintProperties.map(p => <SelectedObjectPaneProperty key={p} label={p} value={this.state[p]} handleChange={this.handleInputChange} />));
+                }
+                case 'composite': {
+                    if (selectedObj.label === 'World') {
+                        return (this.visibleWorldProperties.map(p => <SelectedObjectPaneProperty key={p} label={p} value={this.state[p]} handleChange={this.handleWorldInputChange} />));
+                    }
                 }
             }
         }

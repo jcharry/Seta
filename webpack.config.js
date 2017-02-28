@@ -35,7 +35,8 @@ module.exports = {
             actions: path.resolve(__dirname, 'app', 'actions', 'actions.js'),
             app: path.resolve(__dirname, 'app'),
             images: path.resolve(__dirname, 'app', 'images'),
-            utils: path.resolve(__dirname, 'app', 'utils')
+            utils: path.resolve(__dirname, 'app', 'utils'),
+            models: path.resolve(__dirname, 'app', 'models')
         },
         extensions: ['.js', '.jsx', '.css', '.scss']
     },

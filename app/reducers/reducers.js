@@ -29,12 +29,12 @@ export const gameStatesReducer = (state = {}, action) => {
     }
 };
 
-export const bodiesReducer = (state = {}, action) => {
+export const gameObjectsReducer = (state = {}, action) => {
     switch (action.type) {
-        case 'ADD_BODY':
+        case 'ADD_OBJECT':
             return {
                 ...state,
-                [action.body.id]: action.body
+                [action.obj.id]: action.obj
             };
         case 'REMOVE_BODY': {
             const newState = {};
