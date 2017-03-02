@@ -100,10 +100,12 @@ physicsUtils.prototype = {
         p.scaleY = body.scaleY;
         p.creationSize = utils.clone(body._creationSize);
         p.size = utils.clone(body.size);
+        p.frictionAir = body.frictionAir;
+        p.friction = body.friction;
+        p.frictionStatic = body.frictionStatic;
     },
 
     setInitialProperty(body, property, value) {
-
         // Size is not a Matter.Body property, but here it's being used
         // to handle scaling objects.  Size holds the current size of the body.
         // Initial size is kept constant on _createdSize prop.  And the current
@@ -137,8 +139,27 @@ physicsUtils.prototype = {
             Matter.Body.set(body, property, value);
         }
 
-        this.storeInitialState(body);
+        if (property === 'isStatic') {
+
+        } else {
+            this.storeInitialState(body);
+        }
         // body.originalProperties[property] = value;
+    },
+
+    setAirFriction(world, hasAir) {
+        if (world.label !== 'World') {
+            console.warn('cannot pass objects other than World to setAirFriction');
+            return;
+        }
+
+        world.bodies.forEach(body => {
+            if (hasAir) {
+                Matter.Body.set(body, 'frictionAir', body.originalProperties.frictionAir);
+            } else {
+                Matter.Body.set(body, 'frictionAir', 0);
+            }
+        });
     },
 
     /**

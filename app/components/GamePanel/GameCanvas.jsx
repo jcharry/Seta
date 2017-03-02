@@ -470,7 +470,6 @@ class GameCanvas extends React.Component {
             //
         this.canvasOffset.x += dx;
         this.canvasOffset.y += dy;
-        console.log(this.canvasOffset);
 
         // reset last pos for next update
         this.lastMousePos.x = currentX;

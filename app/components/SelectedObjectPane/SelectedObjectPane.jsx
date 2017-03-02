@@ -1,14 +1,40 @@
 import React from 'react';
 import SelectedObjectPaneProperty from 'components/SelectedObjectPane/SelectedObjectPaneProperty';
-import physicsUtils from 'utils/physicsUtils';
 import { connect } from 'react-redux';
 import * as actions from 'actions';
+import GameState from 'models/GameState';
 // import Matter from 'matter-js';
 
 class SelectedObjectPane extends React.Component {
     constructor(props) {
         super(props);
-        const { selectedObj } = this.props;
+        // const { selectedObj } = this.props;
+
+        this.handleInputChange = this.handleInputChange.bind(this);
+        this.updateBodyProperties = this.updateBodyProperties.bind(this);
+        this.updateConstraintProperties = this.updateConstraintProperties.bind(this);
+        this.constructState = this.constructState.bind(this);
+
+        this.readableLabels = {
+            position: 'Position',
+            velocity: 'Velocity',
+            size: 'Size',
+            angle: 'Rotation',
+            force: 'Force',
+            angularVelocity: 'Spin Rate',
+            isStatic: 'Fixed',
+            density: 'Density',
+            timeScale: 'Time Scale',
+            mass: 'Mass',
+            inertia: 'Inertia',
+            gravity: 'Gravity',
+            stiffness: 'Stiffness',
+            length: 'Length',
+            hasAir: 'Has Air?',
+            friction: 'Friction',
+            frictionAir: 'Air Friction',
+            frictionStatic: 'Static Friction'
+        };
 
         // initialize state with current properties
         this.visibleBodyProperties = [
@@ -22,7 +48,10 @@ class SelectedObjectPane extends React.Component {
             'density',
             'timeScale',
             'mass',
-            'inertia'
+            'inertia',
+            'friction',
+            'frictionAir',
+            'frictionStatic'
         ];
 
         this.visibleConstraintProperties = [
@@ -31,32 +60,13 @@ class SelectedObjectPane extends React.Component {
         ];
 
         this.visibleWorldProperties = [
-            'gravity'
+            'gravity',
+            'hasAir'
         ];
 
-        this.state = {};
-        switch (selectedObj.type) {
-            case 'body':
-                this.visibleBodyProperties.forEach(p => {
-                    this.state[p] = selectedObj[p];
-                });
-                break;
-            case 'constraint':
-                this.visibleConstraintProperties.forEach(p => {
-                    this.state[p] = selectedObj[p];
-                });
-                break;
-            case 'composite':
-                this.visibleWorldProperties.forEach(p => {
-                    this.state[p] = selectedObj[p];
-                });
-                break;
-        }
-
-        this.handleInputChange = this.handleInputChange.bind(this);
-        this.updateBodyProperties = this.updateBodyProperties.bind(this);
-        this.updateConstraintProperties = this.updateConstraintProperties.bind(this);
+        this.state = this.constructState();
     }
+
 
     /**
      * When the selectedBody switches,
@@ -66,38 +76,49 @@ class SelectedObjectPane extends React.Component {
     */
     componentDidUpdate(prevProps) {
         const { selectedObj, dispatch, propertiesPanelNeedsRefresh } = this.props;
-        const newStateObj = {};
+        // const newStateObj = {};
 
-        if (propertiesPanelNeedsRefresh !== prevProps.propertiesPanelNeedsRefresh && propertiesPanelNeedsRefresh === true) {
+        if (propertiesPanelNeedsRefresh !== prevProps.propertiesPanelNeedsRefresh &&
+            propertiesPanelNeedsRefresh === true) {
             dispatch(actions.propertiesPanelNeedsRefresh(false));
-        }
-
-        switch (selectedObj.type) {
-            case 'body': {
-                // Grab properties off currently selected body
-                this.visibleBodyProperties.forEach(p => {
-                    newStateObj[p] = selectedObj[p];
-                });
-                break;
-            }
-            case 'constraint':
-                this.visibleConstraintProperties.forEach(p => {
-                    newStateObj[p] = selectedObj[p];
-                });
-                break;
         }
 
         // Only set the state if the selected body changes
         // The handleInputChange method takes care of setting
         // state when the input boxes change
         if (selectedObj.id !== prevProps.selectedObj.id) {
-            this.setState(newStateObj);     //eslint-disable-line
+            this.setState(this.constructState());     //eslint-disable-line
         }
+    }
+
+    constructState() {
+        const { selectedObj } = this.props;
+        const newState = {};
+        switch (selectedObj.type) {
+            case 'body':
+                this.visibleBodyProperties.forEach(p => {
+                    newState[p] = selectedObj[p];
+                });
+                break;
+            case 'constraint':
+                this.visibleConstraintProperties.forEach(p => {
+                    newState[p] = selectedObj[p];
+                });
+                break;
+            case 'composite':
+                this.visibleWorldProperties.forEach(p => {
+                    newState[p] = selectedObj[p];
+                });
+                break;
+            default:
+                break;
+        }
+        return newState;
+        // this.setState(newState);
     }
 
     handleInputChange(e) {
         const { selectedObj } = this.props;
-
         switch (selectedObj.type) {
             case 'body':
                 this.updateBodyProperties(e);
@@ -105,12 +126,45 @@ class SelectedObjectPane extends React.Component {
             case 'constraint':
                 this.updateConstraintProperties(e);
                 break;
+            case 'composite':
+                if (selectedObj.label === 'World') {
+                    this.updateBodyProperties(e);
+                } else {
+                    this.updateCompositeProperties(e);
+                }
+                break;
+            default:
+                break;
         }
-
     }
+
+    updateCompositeProperties(e) {
+        console.log(e);
+        console.log(this);
+    }
+
+    // updateWorldProperties(e) {
+    //     // const { selectedObj } = this.props;
+    //     // const propName = e.target.name;
+    //     // switch (e.target.type) {
+    //     //     case 'text': {
+    //     //         const val = parseFloat(e.target.value);
+    //     //         if (val || val === 0) {
+    //     //             switch (propName) {
+    //     //                 default:
+    //     //                     break;
+    //     //             }
+    //     //         }
+    //     //     }
+    //     //     default:
+    //     //         break;
+    //     // }
+    // }
 
     updateConstraintProperties(e) {
         const { selectedObj } = this.props;
+        console.log(selectedObj);
+        console.log(this);
         console.log(e);
     }
 
@@ -119,7 +173,14 @@ class SelectedObjectPane extends React.Component {
         const propName = e.target.name;
         switch (e.target.type) {
             case 'checkbox': {
-                physicsUtils.setInitialProperty(selectedObj, propName, e.target.checked);
+                if (propName === 'hasAir') {
+                    console.log('switching hasAir', e.target.checked);
+                    GameState.setAirFriction(selectedObj, e.target.checked);
+                } else {
+                    // dispatch()
+                    GameState.setInitialProperty(selectedObj, propName, e.target.checked);
+                }
+
                 this.setState({
                     [propName]: e.target.checked
                 });
@@ -142,7 +203,7 @@ class SelectedObjectPane extends React.Component {
                             case 'position:x': {
                                 const newPos = { ...selectedObj.position };
                                 newPos[propName[propName.length - 1]] = val;
-                                physicsUtils.setInitialProperty(selectedObj, 'position', newPos);
+                                GameState.setInitialProperty(selectedObj, 'position', newPos);
                                 this.setState({
                                     position: newPos
                                 });
@@ -152,7 +213,7 @@ class SelectedObjectPane extends React.Component {
                             case 'velocity:x': {
                                 const newVel = { ...selectedObj.velocity };
                                 newVel[propName[propName.length - 1]] = val;
-                                physicsUtils.setInitialProperty(selectedObj, 'velocity', newVel);
+                                GameState.setInitialProperty(selectedObj, 'velocity', newVel);
                                 this.setState({
                                     velocity: newVel
                                 });
@@ -162,7 +223,6 @@ class SelectedObjectPane extends React.Component {
                             case 'force:y': {
                                 break;
                             }
-
                             case 'size:radius':
                             case 'size:width':
                             case 'size:height': {
@@ -173,41 +233,88 @@ class SelectedObjectPane extends React.Component {
                                 // Calculate scale (use original size)
                                 // let scaleX, scaleY, scaleR;
                                 if (selectedObj.label === 'Circle Body') {
-                                    physicsUtils.setInitialProperty(selectedObj, 'size', {radius: val});
+                                    GameState.setInitialProperty(selectedObj, 'size', { radius: val });
                                     this.setState({
-                                        size: {radius: val}
+                                        size: { radius: val }
                                     });
                                 } else if (selectedObj.label === 'Rectangle Body') {
                                     // Check if width or height changed
                                     if (propName.split(':')[1] === 'width') {
-                                        physicsUtils.setInitialProperty(selectedObj, 'size', { width: val, height: selectedObj.size.height });
+                                        GameState.setInitialProperty(selectedObj, 'size', { width: val, height: selectedObj.size.height });
                                         this.setState({
-                                            size: { width: val, height: selectedObj.size.height}
+                                            size: { width: val, height: selectedObj.size.height }
                                         });
                                     } else {
                                         // Must be height
-                                        physicsUtils.setInitialProperty(selectedObj, 'size', { width: selectedObj.size.width, height: val });
+                                        GameState.setInitialProperty(selectedObj, 'size', { width: selectedObj.size.width, height: val });
                                         this.setState({
-                                            size: { width: selectedObj.size.width, height: val}
+                                            size: { width: selectedObj.size.width, height: val }
                                         });
                                     }
                                 }
+                                break;
+                            }
+
+                            // WORLD PROPERTIES
+                            case 'gravity:x':
+                            case 'gravity:y': {
+                                const grav = { ...selectedObj.gravity };
+                                grav[propName.slice(-1)] = val;
+                                selectedObj.gravity = grav;
+                                this.setState({
+                                    gravity: grav
+                                });
                                 break;
                             }
                             default:
                                 break;
                         }
                     } else {
-                        physicsUtils.setInitialProperty(selectedObj, propName, val);
+                        GameState.setInitialProperty(selectedObj, propName, val);
                         this.setState({
                             [propName]: val
                         });
                     }
+                } else {
+                    // Input cannot be coerced into a number
+                    // set the state, but don't set any body properties
+                    if (propName.indexOf(':') !== -1) {
+                        // We have an object to set
+                        const props = propName.split(':');
+                        const newState = { ...selectedObj[props[0]] };
+                        if (e.target.value === '') {
+                            newState[props[1]] = '';
+                        } else if (e.target.value === '.') {
+                            newState[props[1]] = '.';
+                        } else if (e.target.value === '0.') {
+                            newState[props[1]] = '0.';
+                        }
+                        this.setState({
+                            [props[0]]: newState
+                        });
+
+                    } else {
+                        let retVal = '';
+                        if (e.target.value === '.') {
+                            retVal = '.';
+                        } else if (e.target.value === '0.') {
+                            retVal = '0.';
+                        }
+                        // just a primative
+                        this.setState({
+                            [propName]: retVal
+                        });
+                    }
                 }
-                break;
             }
             default:
                 break;
+        }
+
+        function getVal(input) {
+            if (input === '') {
+                return input;
+            }
         }
     }
 
@@ -218,17 +325,20 @@ class SelectedObjectPane extends React.Component {
         const renderProperties = () => {
             switch (selectedObj.type) {
                 case 'body':
-                    return (this.visibleBodyProperties.map(p => <SelectedObjectPaneProperty key={p} label={p} value={this.state[p]} handleChange={this.handleInputChange} />));
+                    return (this.visibleBodyProperties.map(p => <SelectedObjectPaneProperty key={p} label={p} readableLabel={this.readableLabels[p]} value={this.state[p]} handleChange={this.handleInputChange} />));
                 case 'constraint': {
-                    return (this.visibleConstraintProperties.map(p => <SelectedObjectPaneProperty key={p} label={p} value={this.state[p]} handleChange={this.handleInputChange} />));
+                    return (this.visibleConstraintProperties.map(p => <SelectedObjectPaneProperty key={p} label={p} readableLabel={this.readableLabels[p]} value={this.state[p]} handleChange={this.handleInputChange} />));
                 }
                 case 'composite': {
                     if (selectedObj.label === 'World') {
-                        return (this.visibleWorldProperties.map(p => <SelectedObjectPaneProperty key={p} label={p} value={this.state[p]} handleChange={this.handleWorldInputChange} />));
+                        return (this.visibleWorldProperties.map(p => <SelectedObjectPaneProperty key={p} label={p} readableLabel={this.readableLabels[p]} value={this.state[p]} handleChange={this.handleInputChange} ignoreProps={['scale']} />));
                     }
+                    return <div />;
                 }
+                default:
+                    return <div />;
             }
-        }
+        };
 
         return (
             <div className='selected-object-pane'>
@@ -244,6 +354,8 @@ class SelectedObjectPane extends React.Component {
 
 SelectedObjectPane.propTypes = {
     selectedObj: React.PropTypes.object.isRequired,
+    dispatch: React.PropTypes.func.isRequired,
+    propertiesPanelNeedsRefresh: React.PropTypes.bool.isRequired
 };
 
 export default connect(state => ({

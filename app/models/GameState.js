@@ -10,6 +10,8 @@ function GameState(dispatch, canvas) {
     // this.world = world;
     this.engine = Matter.Engine.create();
     this.world = this.engine.world;
+    this.world.hasAir = true;
+    this.world.originalProperties = {};
     this.constraints = [];
     this.initialBodies = [];
     this.id = stateId++;
@@ -35,6 +37,7 @@ function GameState(dispatch, canvas) {
         }
     };
 }
+
 
 GameState.prototype.setWorldBounds = function(x, y, width, height) {
     this.world.bounds.min.x = x;
@@ -77,8 +80,17 @@ GameState.prototype.addConstraint = function(type, bodyA, bodyB) {
     this.dispatch(actions.addGameObject(c));
 };
 
+/**
+ * Restore body to original state.
+ * Some properties, like frictionAir, should not
+ * be restored, and only changed through the properties
+ * panel directly.
+ */
 GameState.prototype.restoreBody = function(body) {
-    Matter.Body.set(body, body.originalProperties);
+    Matter.Body.set(body, {
+        ...body.originalProperties,
+        frictionAir: body.frictionAir
+    });
 };
 
 GameState.prototype.setProperty = function(body, property, value) {
@@ -118,27 +130,92 @@ GameState.prototype.setInitialProperty = function(body, property, value) {
     } else {
         Matter.Body.set(body, property, value);
     }
-
-    this.storeInitialState(body);
-    // body.originalProperties[property] = value;
+    this.updateBodyInitialState(body, property);
 };
 
-GameState.prototype.storeInitialState = function(body) {
-    body.originalProperties = {};       // eslint-disable-line
-    const p = body.originalProperties;    // shorthand
-    p.position = utils.clone(body.position);
-    p.velocity = utils.clone(body.velocity);
-    p.isStatic = body.isStatic;
-    p.isSleeping = false;
-    p.mass = body.mass;
+
+/**
+ * Only to be called on body creation.  Set initial properties
+ * off the bat
+ */
+GameState.prototype.initializeBodyState = function(body) {
+    body.originalProperties = {};
+    const p = body.originalProperties;
     p.density = body.density;
     p.inertia = body.inertia;
-    p.angle = body.angle;
+    p.inverseInertia = body.inverseInertia;
+    p.inverseMass = body.inverseMass;
+    p.mass = body.mass;
+    p.isStatic = body.isStatic;
+    p.position = utils.clone(body.position);
+    p.velocity = utils.clone(body.velocity);
     p.angularVelocity = body.angularVelocity;
+    p.angle = body.angle;
+    p.friction = body.friction;
+    p.frictionAir = body.frictionAir;
+    p.frictionStatic = body.frictionStatic;
     p.scaleX = body.scaleX;
     p.scaleY = body.scaleY;
     p.creationSize = utils.clone(body._creationSize);
     p.size = utils.clone(body.size);
+    p.restitution = body.restitution;
+};
+
+GameState.prototype.setAirFriction = function(world, hasAir) {
+    console.log('setting air friction', hasAir);
+    if (world.label !== 'World') {
+        console.warn('cannot pass objects other than World to setAirFriction');
+        return;
+    }
+    world.hasAir = hasAir;
+
+    world.bodies.forEach(body => {
+        debugger;
+        if (hasAir) {
+            Matter.Body.set(body, 'frictionAir', body.originalProperties.frictionAir);
+        } else {
+            Matter.Body.set(body, 'frictionAir', 0);
+        }
+    });
+}
+
+/**
+ * Updates starting properties
+ * NOTE: When Matter sets certain props, like mass, or isStatic,
+ * it also updates necessarily related properties.  This function
+ * is a bit ugly, but we only want to update things that needed
+ * to be updated, so we don't override values by mistake.
+ * @param {Body} body - the body to update
+ * @param {String} property - property being updated
+ */
+GameState.prototype.updateBodyInitialState = function(body, property) {
+    // body.originalProperties = {};       // eslint-disable-line
+    const p = body.originalProperties;    // shorthand
+    if (property === 'mass' || property === 'density' || property === 'inertia') {
+        p.density = body.density;
+        p.inertia = body.inertia;
+        p.inverseInertia = body.inverseInertia;
+        p.inverseMass = body.inverseMass;
+        p.mass = body.mass;
+    } else if (property === 'isStatic') {
+        p.isStatic = body.isStatic;
+    } else if (property === 'position' || property === 'velocity' || property === 'angularVelocity' || property === 'angle') {
+        p.position = utils.clone(body.position);
+        p.velocity = utils.clone(body.velocity);
+        p.angularVelocity = body.angularVelocity;
+        p.angle = body.angle;
+    } else if (property === 'friction' || property === 'frictionAir' || property === 'frictionStatic') {
+        p.friction = body.friction;
+        p.frictionAir = body.frictionAir;
+        p.frictionStatic = body.frictionStatic;
+    } else if (property === 'size') {
+        p.scaleX = body.scaleX;
+        p.scaleY = body.scaleY;
+        p.creationSize = utils.clone(body._creationSize);
+        p.size = utils.clone(body.size);
+    } else if (property === 'restitution') {
+        p.restitution = body.restitution;
+    }
 };
 
 GameState.prototype.bodyFactory = function(type, params) {
@@ -188,7 +265,9 @@ GameState.prototype.bodyFactory = function(type, params) {
 
     // Store the initial state
     if (b) {
-        this.storeInitialState(b);
+        // b.originalProperties = {};
+        this.initializeBodyState(b);
+        // this.updateBodyInitialState(b);
     }
     return b;
 };
@@ -249,8 +328,11 @@ GameState.prototype.restore = function() {
     this.dispatch(actions.setIsPlaying(false));
 };
 
-GameState.Bodies = {
+// Static Methods, they cannot (and must not) operate directly on
+// instance properties.  These must be functional, not OOP
+GameState.setAirFriction = GameState.prototype.setAirFriction;
+GameState.setInitialProperty = GameState.prototype.setInitialProperty;
+GameState.updateBodyInitialState = GameState.prototype.updateBodyInitialState;
 
-};
 
 export default GameState;

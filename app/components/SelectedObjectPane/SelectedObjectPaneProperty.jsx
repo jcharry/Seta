@@ -8,22 +8,27 @@ class SelectedObjectPaneProperty extends React.Component {
     }
 
     keyPressed(e) {
-        console.log(e.key);
-        if (parseInt(e.key) || e.key === '.') {
-            console.log(e.key);
+        if (parseInt(e.key, 10) || e.key === '.') {
             this.props.handleChange(e);
         } else {
             console.warn('not a valid key');
         }
     }
     render() {
-        const { label, value, handleChange } = this.props;
+        const { label, value, handleChange, readableLabel, ignoreProps } = this.props;
         const renderInput = () => {
             switch (typeof value) {
                 case 'object': {
-                    // TODO: Handle object case
+                    // Create an input for each property on the passed in value
+                    // obj, unless the prop is specified as ignored
                     return Object.keys(value).map(prop => {
-                        return <input type='text' key={prop} onChange={handleChange} name={`${label}:${prop}`} value={value[prop]} />;
+                        if (ignoreProps) {
+                            if (ignoreProps.indexOf(prop) === -1) {
+                                return <input type='text' key={prop} onChange={handleChange} name={`${label}:${prop}`} value={value[prop]} />;
+                            }
+                        } else {
+                            return <input type='text' key={prop} onChange={handleChange} name={`${label}:${prop}`} value={value[prop]} />;
+                        }
                     });
                 }
 
@@ -36,24 +41,29 @@ class SelectedObjectPaneProperty extends React.Component {
                     return (<input type='checkbox' name={label} checked={value} onChange={handleChange} />);
                 }
                 default:
-                    break;
+                    return <div />
             }
-
+            return <div />
         };
 
         return (
             <li className='selected-object-property-list-item'>
-                <p>{label}</p>
+                <p>{readableLabel || label}</p>
                 {renderInput()}
             </li>
         );
     }
 }
 
+SelectedObjectPaneProperty.defaultProps = {
+    value: ''
+};
+
 SelectedObjectPaneProperty.propTypes = {
     label: React.PropTypes.string.isRequired,
-    value: React.PropTypes.any.isRequired,
-    handleChange: React.PropTypes.func.isRequired
+    value: React.PropTypes.any,
+    handleChange: React.PropTypes.func.isRequired,
+    readableLabel: React.PropTypes.string
 };
 
 export default SelectedObjectPaneProperty;
