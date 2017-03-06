@@ -11,7 +11,7 @@ process.env.NODE_ENV = process.env.NODE_ENV || 'development';
 process.env.PWD = process.cwd();
 
 module.exports = {
-    devtool: 'source-map',
+    devtool: process.env.NODE_ENV === 'production' ? '' : 'source-map',
     context: path.resolve(__dirname, './app'),
     entry: [
         // 'webpack-dev-server/client?http://localhost:8080',
@@ -97,7 +97,7 @@ module.exports = {
             }
         })
     ],
-    devServer: process.env.NODE_ENV === 'production' ? null : {
+    devServer: process.env.NODE_ENV === 'production' ? {} : {
         contentBase: './dist',
         hot: true,
         historyApiFallback: true
