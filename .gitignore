@@ -8,3 +8,5 @@ config/*.env
 *notes*
 NFLData.json
 *.log
+dist
+
