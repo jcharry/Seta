@@ -14,6 +14,11 @@ export const removeBody = id => ({
     id
 });
 
+export const removeGameObject = id => ({
+    type: 'REMOVE_OBJECT',
+    id
+});
+
 export const clearBodies = () => ({
     type: 'CLEAR_BODIES'
 });

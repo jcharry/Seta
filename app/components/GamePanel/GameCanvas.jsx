@@ -16,11 +16,11 @@ import _ from 'underscore';
 class GameCanvas extends React.Component {
     componentDidMount() {
         const { dispatch } = this.props;
+
         // Bound class methods
         this.renderCanvas = this.renderCanvas.bind(this);
         this.updateEngine = this.updateEngine.bind(this);
         this.drawSelectedBody = this.drawSelectedBody.bind(this);
-        // this.addBody = this.addBody.bind(this);
         this.initializeEventListeners = this.initializeEventListeners.bind(this);
         this.refresh = this.refresh.bind(this);
         this.cleanupScene = this.cleanupScene.bind(this);
@@ -28,92 +28,41 @@ class GameCanvas extends React.Component {
         this.canvasOffset = { x: 0, y: 0 };
         this.lastMousePos = { x: 0, y: 0 };
 
-        window.game = this;
+        // XXX: FOR DEBUG purposes only, don't forget to remove
+        window.seta = this;
 
+        // Prop used for drawing temporary constraints on the canvas
         this.selectedBodyForConstraint = null;
 
         // TODO: Store globally for now...
         window.Matter = Matter;
 
-
         // Bounding rect of canvas in DOM, to be used for Matter Engine
         const { width, height } = this.container.getBoundingClientRect();
         this.canvas.width = width;
         this.canvas.height = height;
-
-        // create an engine
-        // this.engine = Matter.Engine.create();
-
         this.ctx = this.canvas.getContext('2d');
 
         // Capture Matter.Mouse for user interaction
         this.mouse = Matter.Mouse.create(this.canvas);
-        // this.mouseConstraint = Matter.MouseConstraint.create(this.engine, {
-        //     mouse: this.mouse,
-        //     constraint: {
-        //         stiffness: 1
-        //     }
-        // });
 
-        // Matter.World.add(this.engine.world, this.mouseConstraint);
-
-        // create a renderer
-        // this.renderMatter = Matter.Render.create({
-        //     canvas: this.canvas,
-        //     engine: this.engine,
-        //     options: {
-        //         width,
-        //         height,
-        //         pixelRatio: 1,
-        //         background: '#000000',
-        //         wireframeBackground: '#333',
-        //         hasBounds: true,
-        //         enabled: true,
-        //         wireframes: true,
-        //         showSleeping: true,
-        //         showDebug: true,
-        //         showBroadphase: true,
-        //         showBounds: false,
-        //         showVelocity: false,
-        //         showCollisions: true,
-        //         showSeparations: true,
-        //         showAxes: true,
-        //         showPositions: true,
-        //         showAngleIndicator: true,
-        //         showIds: true,
-        //         showShadows: true,
-        //         showVertexNumbers: true,
-        //         showConvexHulls: true,
-        //         showInternalEdges: true,
-        //         showMousePosition: true
-        //     }
-        // });
-
+        // Hold game states data here.  Also store which state is active
+        // on redux store
         this.gameStates = {};
         this.activeState = new GameState(dispatch, this.canvas);
-
         this.gameStates[this.activeState.id] = this.activeState;
-
         this.activeState.world.bounds.min.x = -300;
         this.activeState.world.bounds.min.y = -300;
         this.activeState.world.bounds.max.x = width + 300;
         this.activeState.world.bounds.max.y = height + 300;
-        // this.activeState.constraints.push(this.mouseConstraint);
         dispatch(actions.addGameState(this.activeState.id));
-        // console.log(gameState);
-        // this.gameStates.push({
-        //     id: 1,
-        //     bodies: [],
-        //     initialBodies: []
-        // });
 
-        // this.bodies = [];
-        // this.initialBodies = [];
         // XXX: Remember to remove this!
         // Just for testing
         // window.globalBodies = this.bodies;
         window.as = this.activeState;
 
+        // Canvas Mouse Event Listeners
         this.initializeEventListeners();
 
         // create two boxes and a ground
@@ -122,10 +71,6 @@ class GameCanvas extends React.Component {
         const ground = this.activeState.bodyFactory('Rectangle', { x: 400, y: 610, width: 810, height: 60 });
 
         this.activeState.addBodies([boxA, boxB, ground], this.props.isPlaying);
-        // Matter.World.add(this.engine.world, [boxA, boxB, ground]);
-        // this.activeState.addBody(boxA, world, dispatch, isPlaying);
-        // this.activeState.addBody(boxB, world, dispatch, isPlaying);
-        // this.activeState.addBody(ground, world, dispatch, isPlaying);
 
         // Kick off the animation
         this.renderCanvas();
@@ -133,7 +78,7 @@ class GameCanvas extends React.Component {
 
     componentDidUpdate(prevProps) {
         console.log('canvas did update');
-        const { needsRestart, needsNewGameState, gameStates, primativesPanelSelection } = this.props;
+        const { needsRestart, needsNewGameState, gameStates, primativesPanelSelection, gameObjects } = this.props;
 
         // Update all bodies on a stage reset
         if (prevProps.needsRestart !== needsRestart && needsRestart) {
@@ -151,77 +96,43 @@ class GameCanvas extends React.Component {
             this.switchGameState();
         }
 
+        // Have the game objects changed?
+        if (!_.isEqual(prevProps.gameObjects, gameObjects)) {
+            let pkeys = Object.keys(prevProps.gameObjects);
+            let keys = Object.keys(gameObjects);
+
+            if (pkeys.length > keys.length) {
+                // Removed an object
+                // Find difference in changed bodies
+                let diff = _.difference(pkeys, keys);
+                let type = prevProps.gameObjects[diff[0]].type;
+                if (diff[0]) {
+                    this.activeState.removeGameObject(type, diff[0]);
+                }
+            }
+
+            // Don't worry about adding an object (since that is
+            // taken care of by the gameState and canvas mouse
+            // events
+
+        }
+
         // If the Selected Primative is changed and it's not a constraint,
         // clear out this. to ensure we dont' keep drawing the temporary
         // constraint
         if (!_.isEqual(prevProps.primativesPanelSelection, primativesPanelSelection) && primativesPanelSelection !== 'Rope' && primativesPanelSelection !== 'Spring' && primativesPanelSelection !== 'Rod') {
             this.selectedBodyForConstraint = null;
         }
-        // let prevGameState = prevProps.gameStates.filter(gs => {
-        //     return gs.active;
-        // })[0];
-        // let currentGameState = gameStates.filter(gs => {
-        //     return gs.active;
-        // })[0];
-        // if (prevGameState.id !== currentGameState.id) {
-        //     this.switchGameState(currentGameState.id);
-        // }
-
-        // gameStates.forEach()
-
-        // for (let i = 0; i < gameState.length; i++) {
-        //     if ()
-        // }
     }
 
     refresh() {
         this.activeState.restore();
-        // const { dispatch } = this.props;
-        //
-        // dispatch(actions.needsRestart(false));
-        //
-        // // Remove all bodies generated during play
-        // this.cleanupScene();
-        //
-        // // Restore all initial bodies to their initial states
-        // this.activeState.initialBodies.forEach(body => {
-        //     physicsUtils.restore(body);
-        // });
-        //
-        // // Ensure the engine doesn't update
-        // dispatch(actions.setIsPlaying(false));
     }
 
     cleanupScene() {
         console.log('should remove dynamically generated bodies');
         console.log(this);
     }
-
-    /**
-     * Add a body to all necessary places
-     * 1. this.bodies - holds all bodies in the world
-     * 2. this.initialBodies - holds only bodies initialized during creation
-     *    phase
-     * 3. state.bodies - Redux store so other components can read body
-     *    properties
-     * @param {Matter.Body} body
-    */
-    // addBody(gameState, body) {
-    //     const { dispatch, isPlaying } = this.props;
-    //
-    //     // Only add a body if we're in the creation phase
-    //     // gameState.addBody(body, dispatch, isPlaying);
-    //
-    //     // if (!isPlaying) {
-    //     //     this.initialBodies.push(body);
-    //     //     this.bodies.push(body);
-    //     //     Matter.World.add(this.engine.world, body);
-    //     //     dispatch(actions.addBody(body));
-    //     // } else {
-    //     //     this.bodies.push(body);
-    //     //     dispatch(actions.addBody(body));
-    //     // }
-    // }
 
     /**
      * Creates a new Game State and adds it to the
@@ -251,21 +162,7 @@ class GameCanvas extends React.Component {
 
         // Make sure game is not playing
         dispatch(actions.setIsPlaying(false));
-        // this.activeState = gameStates.filter(gs => {
-        //     return gs.active;
-        // })[0];
-        // gameStates.forEach(gs => {
-        //     // if (gs.id === stateId);
-        // });
     }
-
-    // loadGameState() {
-    //
-    // }
-    //
-    // clearGameState() {
-    //
-    // }
 
     /**
      * Set up all event listeners for canvas interactions
@@ -451,23 +348,6 @@ class GameCanvas extends React.Component {
             dy = 0;
         }
 
-
-        // if (renderBounds.min.x + translate.x < world.bounds.min.x) {
-        //     translate.x = world.bounds.min.x - renderBounds.min.x;
-        // }
-        //
-        // if (renderBounds.max.x + translate.x > world.bounds.max.x) {
-        //     translate.x = world.bounds.max.x - renderBounds.max.x;
-        // }
-        //
-        // if (renderBounds.min.y + translate.y < world.bounds.min.y) {
-        //     translate.y = world.bounds.min.y - renderBounds.min.y;
-        // }
-        //
-        // if (renderBounds.max.y + translate.y > world.bounds.max.y) {
-        //     translate.y = world.bounds.max.y - renderBounds.max.y;
-        // }
-            //
         this.canvasOffset.x += dx;
         this.canvasOffset.y += dy;
 
@@ -475,58 +355,8 @@ class GameCanvas extends React.Component {
         this.lastMousePos.x = currentX;
         this.lastMousePos.y = currentY;
 
-        // move the view
-        // Matter.Bounds.translate(renderBounds, translate);
-
-        // we must update the mouse too
-        // renderBounds.min.x += dx;
-        // renderBounds.min.y += dy;
-        // renderBounds.max.x += dx;
-        // renderBounds.max.y += dy;
-
         // Matter.Mouse.setOffset(this.mouse, renderBounds.min);
         this.ctx.translate(dx, dy);
-
-
-        // this.canvasOffset.x = startPos.x - this.mouse.position.x;
-        // this.canvasOffset.y = startPos.x - this.mouse.position.y;
-
-        // const viewportCentre = {
-        //     x: this.canvas.width / 2,
-        //     y: this.canvas.height / 2
-        // };
-        // let translate;
-        // const world = this.activeState.world;
-        // var deltaCentre = Matter.Vector.sub(this.mouse.absolute, viewportCentre),
-        //     centreDist = Matter.Vector.magnitude(deltaCentre);
-        //
-        // if (centreDist > 50) {
-        //     // create a vector to translate the view, allowing the user to control view speed
-        //     var direction = Matter.Vector.normalise(deltaCentre),
-        //         speed = Math.min(10, Math.pow(centreDist - 50, 2) * 0.0002);
-        //
-        //     translate = Matter.Vector.mult(direction, speed);
-        //
-        //     // prevent the view moving outside the world bounds
-        //     if (this.activeState.renderBounds.min.x + translate.x < world.bounds.min.x)
-        //         translate.x = world.bounds.min.x - this.activeState.renderBounds.min.x;
-        //
-        //     if (this.activeState.renderBounds.max.x + translate.x > world.bounds.max.x)
-        //         translate.x = world.bounds.max.x - this.activeState.renderBounds.max.x;
-        //
-        //     if (this.activeState.renderBounds.min.y + translate.y < world.bounds.min.y)
-        //         translate.y = world.bounds.min.y - this.activeState.renderBounds.min.y;
-        //
-        //     if (this.activeState.renderBounds.max.y + translate.y > world.bounds.max.y)
-        //         translate.y = world.bounds.max.y - this.activeState.renderBounds.max.y;
-        //
-        //     // move the view
-        //     Matter.Bounds.translate(this.activeState.renderBounds, translate);
-        //
-        //     // we must update the mouse too
-        //     Matter.Mouse.setOffset(this.mouse, this.activeState.renderBounds.min);
-        //     this.ctx.translate(-translate.x, -translate.y);
-        // }
     }
 
     /**
@@ -620,24 +450,26 @@ class GameCanvas extends React.Component {
         for (let i = 0; i < this.activeState.bodies.length; i++) {
             this.ctx.beginPath();
             const body = this.activeState.bodies[i];
-            this.ctx.strokeStyle = body.render.strokeStyle;
-            this.ctx.lineWidth = 1;
-            if (body.id === selectedObject) {
-                this.ctx.strokeStyle = 'green';
-                this.ctx.lineWidth = 3;
+            if (body) {
+                this.ctx.strokeStyle = body.render.strokeStyle;
+                this.ctx.lineWidth = 1;
+                if (body.id === selectedObject) {
+                    this.ctx.strokeStyle = 'green';
+                    this.ctx.lineWidth = 3;
+                }
+
+                const vertices = body.vertices;
+
+                this.ctx.moveTo(vertices[0].x, vertices[0].y);
+
+                for (let j = 1; j < vertices.length; j += 1) {
+                    this.ctx.lineTo(vertices[j].x, vertices[j].y);
+                }
+
+                this.ctx.lineTo(vertices[0].x, vertices[0].y);
+
+                this.ctx.stroke();
             }
-
-            const vertices = body.vertices;
-
-            this.ctx.moveTo(vertices[0].x, vertices[0].y);
-
-            for (let j = 1; j < vertices.length; j += 1) {
-                this.ctx.lineTo(vertices[j].x, vertices[j].y);
-            }
-
-            this.ctx.lineTo(vertices[0].x, vertices[0].y);
-
-            this.ctx.stroke();
         }
 
         for (let i = 0; i < this.activeState.constraints.length; i++) {
@@ -655,8 +487,6 @@ class GameCanvas extends React.Component {
                 this.ctx.stroke();
             }
         }
-
-        // this.ctx.strokeStyle = '#333';
 
         if (primativesPanelSelection !== '') {
             this.drawSelectedObject();
@@ -694,8 +524,8 @@ GameCanvas.propTypes = {
     needsRestart: React.PropTypes.bool.isRequired,
     selectedObject: React.PropTypes.number,
     needsNewGameState: React.PropTypes.bool.isRequired,
-    gameStates: React.PropTypes.object.isRequired
-    // bodies: React.PropTypes.object
+    gameStates: React.PropTypes.object.isRequired,
+    gameObjects: React.PropTypes.object.isRequired
 };
 
 export default connect(state => ({
@@ -704,5 +534,6 @@ export default connect(state => ({
     needsRestart: state.needsRestart,
     selectedObject: state.selectedObject,
     needsNewGameState: state.needsNewGameState,
-    gameStates: state.gameStates
+    gameStates: state.gameStates,
+    gameObjects: state.gameObjects
 }))(GameCanvas);

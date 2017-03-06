@@ -170,7 +170,6 @@ GameState.prototype.setAirFriction = function(world, hasAir) {
     world.hasAir = hasAir;
 
     world.bodies.forEach(body => {
-        debugger;
         if (hasAir) {
             Matter.Body.set(body, 'frictionAir', body.originalProperties.frictionAir);
         } else {
@@ -286,6 +285,34 @@ GameState.prototype.addBodies = function(bodies, isPlaying) {
         bodies.forEach(body => {
             this.addBody(body, isPlaying);
         });
+    }
+};
+
+GameState.prototype.removeGameObject = function(type, id) {
+    switch (type) {
+        case 'body':
+            this.bodies = this.bodies.filter((body, i) => {
+                if (body.id === parseInt(id, 10)) {
+                    Matter.World.remove(this.world, body);
+                    if (this.initialBodies.indexOf(body) !== -1) {
+                        this.initialBodies.splice(i, 1);
+                    }
+                    return false;
+                } else {
+                    return true;
+                }
+            });
+            break;
+        case 'constraint':
+            this.constraints = this.constraints.filter(constraint => {
+                if (constraint.id === parseInt(id, 10)) {
+                    Matter.World.remove(this.world, constraint);
+                    return false;
+                } else {
+                    return true;
+                }
+            });
+            break;
     }
 };
 

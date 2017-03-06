@@ -1,5 +1,27 @@
 .objects-list-item {
-    padding: 0.5rem;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    padding: 0.2rem 1rem;
+
+    p {
+        margin: 0;
+        // flex: 1 1 10%;
+        text-align: center;
+    }
+
+    .label {
+        flex: 1 1 80%;
+    }
+
+    .edit {
+        padding: 0 0.2rem;
+        width: 30px;
+        height: 30px;
+    }
+    .edit:hover {
+        background-color: gray;
+    }
 
     &:hover {
         background-color: $list-item-hover-color;
@@ -8,5 +30,6 @@
 
     &.active {
         background-color: $list-item-active-color;
+        color: white;
     }
 }

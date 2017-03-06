@@ -12,6 +12,7 @@ import springImg from 'images/Spring.png';
 import * as actions from 'actions';
 
 
+// TODO: Swap out black icons for white ones when selected
 class PrimativesPanel extends React.Component {
     constructor(props) {
         super(props);

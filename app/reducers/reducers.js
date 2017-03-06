@@ -36,18 +36,17 @@ export const gameObjectsReducer = (state = {}, action) => {
                 ...state,
                 [action.obj.id]: action.obj
             };
-        case 'REMOVE_BODY': {
-            const newState = {};
-            console.log(state);
-            let counter = 0;
-            Object.keys(state).forEach(key => {
-                console.log(counter++);
-                if (parseInt(key, 10) !== action.id) {
-                    newState[state[key].id] = state[key];
+        case 'REMOVE_OBJECT': {
+            return Object.keys(state).reduce((acc, key) => {
+                // Ignore object that matches key we wnat to remove
+                if (parseInt(key, 10) === action.id) {
+                    return acc;
                 }
-            });
-            console.log('new state', newState);
-            return newState;
+
+                // Copy over state
+                acc[key] = state[key];  //eslint-disable-line
+                return acc;
+            }, {});
         }
         case 'CLEAR_BODIES': {
             return {};

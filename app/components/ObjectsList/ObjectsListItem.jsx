@@ -8,10 +8,26 @@ import React from 'react';
 import { connect } from 'react-redux';
 import * as actions from 'actions';
 
+import pencilBlackImg from 'images/Pencil-50-black.png';
+import pencilWhiteImg from 'images/Pencil-50-white.png';
+
 class ObjectsListItem extends React.Component {
     constructor(props) {
         super(props);
         this.handleClick = this.handleClick.bind(this);
+        this.handleRemoveItem = this.handleRemoveItem.bind(this);
+        this.handleEditClicked = this.handleEditClicked.bind(this);
+    }
+
+    handleEditClicked() {
+        // Show popup
+        const { body } = this.props;
+        console.log('hsould edit', `${body.id}: ${body.label}`);
+    }
+
+    handleRemoveItem() {
+        const { dispatch, body } = this.props;
+        dispatch(actions.removeGameObject(body.id));
     }
 
     handleClick() {
@@ -20,12 +36,18 @@ class ObjectsListItem extends React.Component {
     }
     render() {
         const { body, selectedObject } = this.props;
-        let clsName = 'objects-list-item';
+        let isActive = false;
         if (body.id === selectedObject) {
-            clsName += ' active';
+            isActive = true;
         }
         return (
-            <li className={clsName} onClick={this.handleClick}>{body.id}: {body.label}</li>
+            <li className={isActive ? 'objects-list-item active' : 'objects-list-item'} onClick={this.handleClick}>
+                <img className='edit' src={isActive ? pencilWhiteImg : pencilBlackImg} onClick={this.handleEditClicked}/>
+                <p className='label'>{body.id}: {body.label}</p>
+
+                {/* Cannot delete the world */}
+                {body.label !== 'World' && <p onClick={this.handleRemoveItem}>X</p>}
+            </li>
         );
     }
 }
