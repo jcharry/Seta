@@ -3,7 +3,7 @@ const app = express();
 const path = require('path');
 
 // Heroku passes a port # as an environment var
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 9090;
 // Heroku doesn't like __dirname, so we set the current
 // working directory to an ENV variable to reference
 // a static directory containing data files
