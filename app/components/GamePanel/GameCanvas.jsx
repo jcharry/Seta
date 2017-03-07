@@ -22,6 +22,8 @@ class GameCanvas extends React.Component {
         this.updateEngine = this.updateEngine.bind(this);
         this.drawSelectedBody = this.drawSelectedBody.bind(this);
         this.initializeEventListeners = this.initializeEventListeners.bind(this);
+        this.initializeMatterCollisionEvents = this.initializeMatterCollisionEvents.bind(this);
+        this.clearEngineEvents = this.clearEngineEvents.bind(this);
         this.refresh = this.refresh.bind(this);
         this.cleanupScene = this.cleanupScene.bind(this);
         this.pan = this.pan.bind(this);
@@ -42,6 +44,10 @@ class GameCanvas extends React.Component {
         this.canvas.width = width;
         this.canvas.height = height;
         this.ctx = this.canvas.getContext('2d');
+
+        // Translate the ctx to ensure clean lines
+        // see here - http://stackoverflow.com/questions/7530593/html5-canvas-and-line-width/7531540#7531540
+        this.ctx.translate(0.5, 0.5);
 
         // Capture Matter.Mouse for user interaction
         this.mouse = Matter.Mouse.create(this.canvas);
@@ -64,6 +70,7 @@ class GameCanvas extends React.Component {
 
         // Canvas Mouse Event Listeners
         this.initializeEventListeners();
+        this.initializeMatterCollisionEvents();
 
         // create two boxes and a ground
         const boxA = this.activeState.bodyFactory('Rectangle', { x: 400, y: 200, width: 80, height: 80 });
@@ -78,7 +85,23 @@ class GameCanvas extends React.Component {
 
     componentDidUpdate(prevProps) {
         console.log('canvas did update');
-        const { needsRestart, needsNewGameState, gameStates, primativesPanelSelection, gameObjects } = this.props;
+        const {
+            needsRestart,
+            needsNewGameState,
+            gameStates,
+            primativesPanelSelection,
+            gameObjects,
+            behaviors
+        } = this.props;
+
+
+        //FIXME: Handle behaviors situation, not sure best way to do that yet
+
+        if (!_.isEqual(prevProps.behaviors, behaviors)) {
+            if (behaviors.length > prevProps.behaviors.length) {
+                this.activeState.behaviors.push(behaviors[behaviors.length - 1]);
+            }
+        }
 
         // Update all bodies on a stage reset
         if (prevProps.needsRestart !== needsRestart && needsRestart) {
@@ -98,14 +121,14 @@ class GameCanvas extends React.Component {
 
         // Have the game objects changed?
         if (!_.isEqual(prevProps.gameObjects, gameObjects)) {
-            let pkeys = Object.keys(prevProps.gameObjects);
-            let keys = Object.keys(gameObjects);
+            const pkeys = Object.keys(prevProps.gameObjects);
+            const keys = Object.keys(gameObjects);
 
             if (pkeys.length > keys.length) {
                 // Removed an object
                 // Find difference in changed bodies
-                let diff = _.difference(pkeys, keys);
-                let type = prevProps.gameObjects[diff[0]].type;
+                const diff = _.difference(pkeys, keys);
+                const type = prevProps.gameObjects[diff[0]].type;
                 if (diff[0]) {
                     this.activeState.removeGameObject(type, diff[0]);
                 }
@@ -114,7 +137,6 @@ class GameCanvas extends React.Component {
             // Don't worry about adding an object (since that is
             // taken care of by the gameState and canvas mouse
             // events
-
         }
 
         // If the Selected Primative is changed and it's not a constraint,
@@ -159,6 +181,11 @@ class GameCanvas extends React.Component {
                 this.activeState.restore();
             }
         });
+
+        // TODO: Make sure this isn't just piling on events...
+        // SHit.. it is...
+        this.clearEngineEvents();
+        this.initializeMatterCollisionEvents();
 
         // Make sure game is not playing
         dispatch(actions.setIsPlaying(false));
@@ -319,6 +346,51 @@ class GameCanvas extends React.Component {
         // });
     }
 
+    clearEngineEvents() {
+        Matter.Events.off(this.activeState.engine, 'collisionStart');
+        Matter.Events.off(this.activeState.engine, 'collisionActive');
+        Matter.Events.off(this.activeState.engine, 'collisionEnd');
+    }
+
+    initializeMatterCollisionEvents() {
+        // an example of using collisionStart event on an engine
+        Matter.Events.on(this.activeState.engine, 'collisionStart', event => {
+            const pairs = event.pairs;
+
+            // change object colours to show those starting a collision
+            for (let i = 0; i < pairs.length; i++) {
+                const pair = pairs[i];
+                pair.bodyA.render.fillStyle = '#333';
+                pair.bodyB.render.fillStyle = '#333';
+            }
+        });
+
+        // an example of using collisionActive event on an engine
+        Matter.Events.on(this.activeState.engine, 'collisionActive', event => {
+            const pairs = event.pairs;
+
+            // change object colours to show those in an active collision (e.g. resting contact)
+            for (let i = 0; i < pairs.length; i++) {
+                const pair = pairs[i];
+                pair.bodyA.render.fillStyle = '#333';
+                pair.bodyB.render.fillStyle = '#333';
+            }
+        });
+
+        // an example of using collisionEnd event on an engine
+        Matter.Events.on(this.activeState.engine, 'collisionEnd', event => {
+            const pairs = event.pairs;
+
+            // change object colours to show those ending a collision
+            for (let i = 0; i < pairs.length; i++) {
+                const pair = pairs[i];
+
+                pair.bodyA.render.fillStyle = '#fff';
+                pair.bodyB.render.fillStyle = '#fff';
+            }
+        });
+    }
+
     pan() {
         const world = this.activeState.world;
         const renderBounds = this.activeState.renderBounds;
@@ -452,10 +524,12 @@ class GameCanvas extends React.Component {
             const body = this.activeState.bodies[i];
             if (body) {
                 this.ctx.strokeStyle = body.render.strokeStyle;
+                this.ctx.fillStyle = body.render.fillStyle || 'transparent';
                 this.ctx.lineWidth = 1;
                 if (body.id === selectedObject) {
-                    this.ctx.strokeStyle = 'green';
-                    this.ctx.lineWidth = 3;
+                    this.ctx.strokeStyle = 'darkgreen';
+                    this.ctx.fillStyle = 'lightgreen';
+                    this.ctx.lineWidth = 2;
                 }
 
                 const vertices = body.vertices;
@@ -469,6 +543,7 @@ class GameCanvas extends React.Component {
                 this.ctx.lineTo(vertices[0].x, vertices[0].y);
 
                 this.ctx.stroke();
+                this.ctx.fill();
             }
         }
 
@@ -525,7 +600,8 @@ GameCanvas.propTypes = {
     selectedObject: React.PropTypes.number,
     needsNewGameState: React.PropTypes.bool.isRequired,
     gameStates: React.PropTypes.object.isRequired,
-    gameObjects: React.PropTypes.object.isRequired
+    gameObjects: React.PropTypes.object.isRequired,
+    behaviors: React.PropTypes.array.isRequired
 };
 
 export default connect(state => ({
@@ -535,5 +611,6 @@ export default connect(state => ({
     selectedObject: state.selectedObject,
     needsNewGameState: state.needsNewGameState,
     gameStates: state.gameStates,
-    gameObjects: state.gameObjects
+    gameObjects: state.gameObjects,
+    behaviors: state.behaviors
 }))(GameCanvas);

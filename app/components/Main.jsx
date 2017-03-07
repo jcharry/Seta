@@ -6,10 +6,10 @@
  */
 import React from 'react';
 import MenuPanel from 'components/MenuPanel/MenuPanel';
-// import TextEditor from './TextEditor';
 import GamePanel from 'components/GamePanel/GamePanel';
 import PrimativesPanel from 'components/PrimativesPanel/PrimativesPanel';
 import PropertiesPanel from 'components/PropertiesPanel/PropertiesPanel';
+import InteractionPanel from 'components/InteractionPanel/InteractionPanel';
 
 class Main extends React.Component {
     render() {
@@ -22,8 +22,8 @@ class Main extends React.Component {
                     <PrimativesPanel />
                     <GamePanel />
                     <PropertiesPanel />
-                    {/* <TextEditor /> */}
                 </div>
+                <InteractionPanel />
             </div>
         );
     }

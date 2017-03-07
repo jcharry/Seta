@@ -123,3 +123,28 @@ export const propertiesPanelNeedsRefreshReducer = (state = false, action) => {
             return state;
     }
 };
+
+export const interactionPanelOpenReducer = (state = false, action) => {
+    switch (action.type) {
+        case 'TOGGLE_INTERACTION_PANEL':
+            return !state;
+        case 'OPEN_INTERACTION_PANEL':
+            return true;
+        case 'CLOSE_INTERACTION_PANEL':
+            return false;
+        default:
+            return state;
+    }
+};
+
+export const behaviorsReducer = (state = [], action) => {
+    switch (action.type) {
+        case 'ADD_COLLISION_BEHAVIOR':
+            return [
+                ...state,
+                action.collision
+            ];
+        default:
+            return state;
+    }
+};

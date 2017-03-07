@@ -2,10 +2,13 @@ import React from 'react';
 import { connect } from 'react-redux';
 import PrimativesList from 'components/PrimativesPanel/PrimativesList';
 
-import rectImg from 'images/Rectangle.png';
-import circleImg from 'images/Circle.png';
-import polyImg from 'images/Polygon.png';
-import ropeImg from 'images/Rope.png';
+import rectImg from 'images/Rectangle/Inactive.png';
+import rectImgActive from 'images/Rectangle/Active.png';
+import circleImg from 'images/Oval/Inactive.png';
+import circleImgActive from 'images/Oval/Active.png';
+import polyImg from 'images/Polygon/Inactive.png';
+import polyImgActive from 'images/Polygon/Active.png';
+// import ropeImg from 'images/Rope.png';
 import rodImg from 'images/Rod.png';
 import springImg from 'images/Spring.png';
 
@@ -33,7 +36,7 @@ class PrimativesPanel extends React.Component {
 
     render() {
         const { primativesPanelSelection } = this.props;
-        const panes = [{title: 'Shapes', items: [{title: 'Rectangle', image: rectImg, active: false}, {title: 'Circle', image: circleImg, active: false}, {title: 'Polygon', image: polyImg, active: false}]}, {title: 'Connectors', items: [{title: 'Rope', image: ropeImg, active: false}, {title: 'Spring', image: springImg, active: false}, {title: 'Rod', image: rodImg, active: false}]}];   //eslint-disable-line
+        const panes = [{title: 'Shapes', items: [{title: 'Rectangle', activeImg: rectImgActive, img: rectImg, active: false}, {title: 'Circle', activeImg: circleImgActive, img: circleImg, active: false}, {title: 'Polygon', activeImg: polyImgActive, img: polyImg, active: false}]}, {title: 'Connectors', items: [{title: 'Spring', activeImg: springImg, img: springImg, active: false}, {title: 'Rod', activeImg: rodImg, img: rodImg, active: false}]}];   //eslint-disable-line
         panes.forEach(pane => {
             pane.items.forEach(item => {
                 if (item.title === primativesPanelSelection) {

@@ -34,12 +34,12 @@ class StatePanel extends React.Component {
             if (gameStates[id]) {
                 clsName += ' active';
             }
-            return <button onClick={() => { this.switchGameState(id); }} className={clsName} key={id}>State: {id}</button>;
+            return <button onClick={() => { this.switchGameState(id); }} className={clsName} key={id}>world: {id}</button>;
         });
 
         return (
             <div className='state-panel'>
-                <h2>States</h2>
+                <h2>Worlds</h2>
                 {renderStateButtons()}
                 <button onClick={this.addGameState}>Add</button>
             </div>

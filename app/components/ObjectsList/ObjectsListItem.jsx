@@ -10,6 +10,7 @@ import * as actions from 'actions';
 
 import pencilBlackImg from 'images/Pencil-50-black.png';
 import pencilWhiteImg from 'images/Pencil-50-white.png';
+import deleteImg from 'images/Delete-50-black.png';
 
 class ObjectsListItem extends React.Component {
     constructor(props) {
@@ -20,13 +21,14 @@ class ObjectsListItem extends React.Component {
     }
 
     handleEditClicked() {
-        // Show popup
-        const { body } = this.props;
-        console.log('hsould edit', `${body.id}: ${body.label}`);
+        const { dispatch } = this.props;
+        // e.stopPropagation();
+        dispatch(actions.openInteractionPanel());
     }
 
-    handleRemoveItem() {
+    handleRemoveItem(e) {
         const { dispatch, body } = this.props;
+        e.stopPropagation();
         dispatch(actions.removeGameObject(body.id));
     }
 
@@ -42,15 +44,21 @@ class ObjectsListItem extends React.Component {
         }
         return (
             <li className={isActive ? 'objects-list-item active' : 'objects-list-item'} onClick={this.handleClick}>
-                <img className='edit' src={isActive ? pencilWhiteImg : pencilBlackImg} onClick={this.handleEditClicked}/>
+                {body.label !== 'World' && <img className='edit' src={isActive ? pencilWhiteImg : pencilBlackImg} onClick={this.handleEditClicked} alt='edit' /> }
                 <p className='label'>{body.id}: {body.label}</p>
 
                 {/* Cannot delete the world */}
-                {body.label !== 'World' && <p onClick={this.handleRemoveItem}>X</p>}
+                {body.label !== 'World' && <img src={deleteImg} alt={`delete object ${body.id}`} onClick={this.handleRemoveItem} />}
             </li>
         );
     }
 }
+
+ObjectsListItem.propTypes = {
+    dispatch: React.PropTypes.func.isRequired,
+    body: React.PropTypes.object.isRequired,
+    selectedObject: React.PropTypes.number.isRequired
+};
 
 export default connect(state => ({
     selectedObject: state.selectedObject

@@ -17,6 +17,12 @@ function GameState(dispatch, canvas) {
     this.id = stateId++;
     this.dispatch = dispatch;
     this.active = false;
+    this.collisionEvents = [];
+    this.controls = {};
+
+    // TODO: Behavior system doesn't work properly
+    // Need to figure out a better way to handle this
+    this.behaviors = [];
 
     dispatch(actions.addGameObject(this.world));
 

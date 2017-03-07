@@ -14,13 +14,15 @@
         flex: 1 1 80%;
     }
 
-    .edit {
-        padding: 0 0.2rem;
-        width: 30px;
-        height: 30px;
+    img {
+        padding: 0.2rem;
+        width: 25px;
+        height: 25px;
     }
-    .edit:hover {
-        background-color: gray;
+    img:hover {
+        // padding: 0 0.3rem;
+        
+        background-color: $list-item-active-color;
     }
 
     &:hover {

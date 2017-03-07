@@ -13,7 +13,7 @@ class PrimativesList extends React.Component {
         return (
             <div className='primatives-panel-list'>
                 <h2>{title}</h2>
-                {items.map(item => <PrimativesListItem key={item.title} clickHandler={itemClickHandler} active={item.active} image={item.image} title={item.title} />)}
+                {items.map(item => <PrimativesListItem key={item.title} clickHandler={itemClickHandler} active={item.active} image={item.active ? item.activeImg : item.img} title={item.title} />)}
             </div>
         );
     }

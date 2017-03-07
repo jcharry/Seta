@@ -80,3 +80,15 @@ export const propertiesPanelNeedsRefresh = needsRefresh => ({
     type: 'PROPERTIES_PANEL_NEEDS_REFRESH',
     needsRefresh
 });
+
+export const closeInteractionPanel = () => ({
+    type: 'CLOSE_INTERACTION_PANEL'
+});
+export const openInteractionPanel = () => ({
+    type: 'OPEN_INTERACTION_PANEL'
+});
+
+export const addCollisionBehavior = collision => ({
+    type: 'ADD_COLLISION_BEHAVIOR',
+    collision
+});

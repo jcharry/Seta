@@ -18,6 +18,8 @@ class About extends React.Component {
                 <ul>
                     <a href="https://icons8.com/web-app/11737/Pencil">Pencil icon credits</a>
                     <a href="https://icons8.com/web-app/11705/Delete">Delete icon credits</a>
+                    <a href="https://icons8.com/web-app/19718/Close-Window">Close window icon credits</a>
+                    <a href="https://icons8.com/web-app/37839/Add-Filled">Add filled icon credits</a>
 
                 </ul>
             </div>

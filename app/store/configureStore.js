@@ -11,7 +11,9 @@ import {
     needsRestartReducer,
     gameStatesReducer,
     needsNewGameStateReducer,
-    propertiesPanelNeedsRefreshReducer
+    propertiesPanelNeedsRefreshReducer,
+    interactionPanelOpenReducer,
+    behaviorsReducer
 } from '../reducers/reducers';
 
 const configure = (initialState = {}) => {
@@ -24,7 +26,9 @@ const configure = (initialState = {}) => {
         needsRestart: needsRestartReducer,
         gameStates: gameStatesReducer,
         needsNewGameState: needsNewGameStateReducer,
-        propertiesPanelNeedsRefresh: propertiesPanelNeedsRefreshReducer
+        propertiesPanelNeedsRefresh: propertiesPanelNeedsRefreshReducer,
+        interactionPanelOpen: interactionPanelOpenReducer,
+        behaviors: behaviorsReducer
     });
 
     const store = redux.createStore(reducer, initialState, redux.compose(
