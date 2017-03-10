@@ -85,17 +85,7 @@ module.exports = {
         new webpack.HotModuleReplacementPlugin(),
         new HtmlWebpackPlugin({
             template: './index.html',
-            filename: 'main.html'
-        }),
-        new HtmlWebpackPlugin({
-            template: './mobile.html',
-            filename: 'mobile.html',
-            inject: false
-        }),
-        new HtmlWebpackPlugin({
-            template: './notchrome.html',
-            filename: 'notchrome.html',
-            inject: false
+            filename: 'index.html'
         }),
         new webpack.DefinePlugin({
             'process.env': {

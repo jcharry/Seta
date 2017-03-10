@@ -1,8 +1,11 @@
-function CollisionEvent(bodyId, collidingBody, action, resolution) {
+function CollisionEvent(stateId, bodyId, collidingBody, action, resolution) {
+    this.gameState = stateId;
     this.body = bodyId;
     this.collidingBody = collidingBody;
     this.action = action;
     this.resolution = resolution;
+    this.id = `b${bodyId}-c${collidingBody}-a${action}`;
+    this.type = 'collision';
 }
 
 export default CollisionEvent;

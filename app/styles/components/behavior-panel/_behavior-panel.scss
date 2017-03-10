@@ -1,0 +1,73 @@
+.interaction-panel {
+    position: fixed;
+    top: 160px;
+    right: 200px;
+    width: 600px;
+    background-color: orange;
+    padding: 1rem;
+
+    flex-direction: column;
+
+    h2, h3, p {
+        margin: 0;
+        padding: 0;
+    }
+
+    h2 {
+        color: $panel-color;
+    }
+
+    .behavior-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        .highlight {
+            color: orange;
+        }
+        
+        img {
+            width: 25px;
+            height: 25px;
+            cursor: pointer;
+        }
+    }
+
+    &.visible {
+        display: flex;
+    }
+    &.hidden {
+        display: none;
+    }
+
+    .close-btn {
+        position: absolute;
+        top: 0;
+        right: 0;
+    }
+
+    .new {
+        display: flex;
+        align-items: center;
+        padding: 1rem;
+        background-color: $panel-color;
+    }
+
+    select {
+        margin: 0 0.3rem;
+    }
+
+    .inputs {
+        display: flex;
+        align-items: center;
+    }
+
+    .behavior-list {
+        list-style: none;
+        margin: 0;
+        padding: 1rem;
+        background-color: $panel-color;
+        max-height: 80px;
+        overflow-y: auto;
+    }
+}
+

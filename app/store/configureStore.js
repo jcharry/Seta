@@ -12,8 +12,9 @@ import {
     gameStatesReducer,
     needsNewGameStateReducer,
     propertiesPanelNeedsRefreshReducer,
-    interactionPanelOpenReducer,
-    behaviorsReducer
+    behaviorPanelOpenReducer,
+    behaviorsReducer,
+    scoreReducer
 } from '../reducers/reducers';
 
 const configure = (initialState = {}) => {
@@ -27,8 +28,9 @@ const configure = (initialState = {}) => {
         gameStates: gameStatesReducer,
         needsNewGameState: needsNewGameStateReducer,
         propertiesPanelNeedsRefresh: propertiesPanelNeedsRefreshReducer,
-        interactionPanelOpen: interactionPanelOpenReducer,
-        behaviors: behaviorsReducer
+        behaviorPanelOpen: behaviorPanelOpenReducer,
+        behaviors: behaviorsReducer,
+        score: scoreReducer
     });
 
     const store = redux.createStore(reducer, initialState, redux.compose(

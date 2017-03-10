@@ -1,4 +1,4 @@
-/* global document */
+/* global document window */
 
 // Client side modules
 import ReactDOM from 'react-dom';
@@ -9,11 +9,13 @@ import router from 'app/router/index';
 import configure from 'app/store/configureStore';
 
 // STYLES
-import 'app/styles/main.scss';
-
-require('codemirror/lib/codemirror.css');
+require('app/styles/main.scss');
+// require('codemirror/lib/codemirror.css');
 
 const store = configure();
+
+// XXX: DEBUGGING - CAN REMOVE
+window._DEBUG = true;
 
 ReactDOM.render(
     <div>

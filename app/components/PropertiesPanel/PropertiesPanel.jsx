@@ -8,8 +8,6 @@ class PropertiesPanel extends React.Component {
     render() {
         const { selectedObject, gameObjects } = this.props;
         const selectedBody = selectedObject === -1 ? null : gameObjects[selectedObject];
-        console.log('properties panel', selectedBody);
-
         return (
             <div className='panel properties-panel'>
                 <ObjectsList gameObjects={gameObjects} />

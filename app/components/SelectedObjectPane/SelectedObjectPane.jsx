@@ -33,22 +33,22 @@ class SelectedObjectPane extends React.Component {
             hasAir: 'Has Air?',
             friction: 'Friction',
             frictionAir: 'Air Friction',
-            frictionStatic: 'Static Friction'
+            frictionStatic: 'Static Friction',
+            restitution: 'Bounciness'
         };
 
         // initialize state with current properties
         this.visibleBodyProperties = [
+            'size',
             'position',
             'velocity',
-            'size',
             'angle',
+            'isStatic',
+            'restitution',
             'force',
             'angularVelocity',
-            'isStatic',
             'density',
-            'timeScale',
             'mass',
-            'inertia',
             'friction',
             'frictionAir',
             'frictionStatic'

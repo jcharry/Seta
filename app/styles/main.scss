@@ -17,7 +17,9 @@
 @import 'components/primatives-panel/primatives-panel-list';
 
 // Interaction Panel (where we set collisions, etc)
-@import 'components/interaction-panel/interaction-panel';
+@import 'components/behavior-panel/behavior-panel';
+
+@import 'components/score';
 
 @import url('https://fonts.googleapis.com/css?family=Bahiana|Barrio|Caveat+Brush|Josefin+Sans');
 

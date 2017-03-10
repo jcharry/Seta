@@ -81,14 +81,32 @@ export const propertiesPanelNeedsRefresh = needsRefresh => ({
     needsRefresh
 });
 
-export const closeInteractionPanel = () => ({
-    type: 'CLOSE_INTERACTION_PANEL'
+export const closeBehaviorPanel = () => ({
+    type: 'CLOSE_BEHAVIOR_PANEL'
 });
-export const openInteractionPanel = () => ({
-    type: 'OPEN_INTERACTION_PANEL'
+export const openBehaviorPanel = () => ({
+    type: 'OPEN_BEHAVIOR_PANEL'
 });
 
-export const addCollisionBehavior = collision => ({
+// TODO: Compress behavior actions to one action
+export const addCollisionBehavior = (id, collision) => ({
     type: 'ADD_COLLISION_BEHAVIOR',
-    collision
+    id,
+    behavior: collision
+});
+
+export const addControlBehavior = (id, control) => ({
+    type: 'ADD_CONTROL_BEHAVIOR',
+    id,
+    behavior: control
+});
+
+
+export const addScore = score => ({
+    type: 'ADD_SCORE',
+    score
+});
+
+export const resetScore = () => ({
+    type: 'RESET_SCORE'
 });

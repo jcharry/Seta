@@ -2,6 +2,7 @@ import * as actions from 'actions';
 // import physicsUtils from 'utils/physicsUtils';
 import Matter from 'matter-js';
 import * as utils from 'utils/utils';
+import camera from 'models/Camera';
 
 let stateId = 1;
 
@@ -31,6 +32,8 @@ function GameState(dispatch, canvas) {
     this.world.bounds.min.y = -300;
     this.world.bounds.max.x = canvas.width + 300;
     this.world.bounds.max.y = canvas.height + 300;
+
+    this.camera = camera(canvas, this.world);
 
     this.renderBounds = {
         min: {
@@ -145,7 +148,7 @@ GameState.prototype.setInitialProperty = function(body, property, value) {
  * off the bat
  */
 GameState.prototype.initializeBodyState = function(body) {
-    body.originalProperties = {};
+    body.originalProperties = {};   //eslint-disable-line
     const p = body.originalProperties;
     p.density = body.density;
     p.inertia = body.inertia;
@@ -173,7 +176,7 @@ GameState.prototype.setAirFriction = function(world, hasAir) {
         console.warn('cannot pass objects other than World to setAirFriction');
         return;
     }
-    world.hasAir = hasAir;
+    world.hasAir = hasAir;  //eslint-disable-line
 
     world.bodies.forEach(body => {
         if (hasAir) {
@@ -182,7 +185,7 @@ GameState.prototype.setAirFriction = function(world, hasAir) {
             Matter.Body.set(body, 'frictionAir', 0);
         }
     });
-}
+};
 
 /**
  * Updates starting properties
@@ -233,11 +236,13 @@ GameState.prototype.bodyFactory = function(type, params) {
         height = params.height === undefined ? 50 : params.height,
         radius = params.radius === undefined ? 50 : params.radius;
 
+    const isFixed = params.isFixed === undefined ? false : true;
+
     // Make Body
     let b;
     switch (type) {
         case 'Rectangle':
-            b = Matter.Bodies.rectangle(x, y, width, height);
+            b = Matter.Bodies.rectangle(x, y, width, height, {isStatic: isFixed});
             b.scaleX = 1;
             b.scaleY = 1;
             b._creationSize = {
@@ -294,19 +299,80 @@ GameState.prototype.addBodies = function(bodies, isPlaying) {
     }
 };
 
-GameState.prototype.removeGameObject = function(type, id) {
+GameState.prototype.addBehavior = function(behavior) {
+    this.behaviors.push(behavior);
+};
+
+GameState.prototype.resolveBehavior = function(behavior) {
+    const bodyId = behavior.body;
+    const body = this.bodies.filter(b => b.id === bodyId)[0];
+    switch (behavior.action) {
+        case 'score': {
+            console.log('score fired');
+            this.dispatch(actions.addScore(parseInt(behavior.resolution, 10)));
+            break;
+        }
+        case 'destroy': {
+            console.log('destroy fired');
+            this.removeGameObject('body', behavior.resolution, true);
+            break;
+        }
+        case 'force up':
+        case 'force down': {
+            const dir = behavior.action.substr(6);
+            let yForce = 0;
+            if (dir === 'up') yForce = -0.1;
+            else if (dir === 'down') yForce = 0.1;
+            Matter.Body.applyForce(body, body.position, {x: 0, y: yForce});
+            break;
+        }
+        case 'force left':
+        case 'force right': {
+            const dir = behavior.action.substr(6);
+            let xForce = 0;
+            if (dir === 'left') xForce = -0.1;
+            else if (dir === 'right') xForce = 0.1;
+            Matter.Body.applyForce(body, body.position, {x: xForce, y: 0});
+            break;
+        }
+        case 'move left':
+        case 'move right':
+            let dir = behavior.action.substr(5);
+            let xChange = 0;
+            if (dir === 'left') xChange = -5;
+            else if (dir === 'right') xChange = 5;
+            break;
+        case 'move up':
+        case 'move down': {
+            // Get direction
+            let dir = behavior.action.substr(5);
+            let yChange = 0;
+            if (dir === 'up') yChange = -5;
+            else if (dir === 'down') yChange = 5;
+            Matter.Body.setPosition(body, {x: body.position.x, y: body.position.y + yChange});
+            break;
+        }
+        case 'shoot':
+            break;
+        default:
+            console.log('no behavior resolution defined, see GameState.resolveBehavior');
+            break;
+    }
+};
+
+GameState.prototype.removeGameObject = function(type, id, shouldKeep) {
+    shouldKeep = shouldKeep === undefined ? false : true;   //eslint-disable-line
     switch (type) {
         case 'body':
             this.bodies = this.bodies.filter((body, i) => {
                 if (body.id === parseInt(id, 10)) {
                     Matter.World.remove(this.world, body);
-                    if (this.initialBodies.indexOf(body) !== -1) {
+                    if (this.initialBodies.indexOf(body) !== -1 && shouldKeep === false) {
                         this.initialBodies.splice(i, 1);
                     }
                     return false;
-                } else {
-                    return true;
                 }
+                return true;
             });
             break;
         case 'constraint':
@@ -314,10 +380,11 @@ GameState.prototype.removeGameObject = function(type, id) {
                 if (constraint.id === parseInt(id, 10)) {
                     Matter.World.remove(this.world, constraint);
                     return false;
-                } else {
-                    return true;
                 }
+                return true;
             });
+            break;
+        default:
             break;
     }
 };
@@ -338,6 +405,7 @@ GameState.prototype.restore = function() {
     // Need to set redux state "needsRestart" to false,
     // so that we don't update again
     this.dispatch(actions.needsRestart(false));
+    this.dispatch(actions.resetScore());
     Matter.World.clear(this.world);
 
     this.bodies = [];
@@ -359,6 +427,8 @@ GameState.prototype.restore = function() {
 
     // Ensure the engine doesn't update
     this.dispatch(actions.setIsPlaying(false));
+
+    this.camera.reset();
 };
 
 // Static Methods, they cannot (and must not) operate directly on

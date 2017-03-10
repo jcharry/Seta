@@ -9,7 +9,8 @@ import MenuPanel from 'components/MenuPanel/MenuPanel';
 import GamePanel from 'components/GamePanel/GamePanel';
 import PrimativesPanel from 'components/PrimativesPanel/PrimativesPanel';
 import PropertiesPanel from 'components/PropertiesPanel/PropertiesPanel';
-import InteractionPanel from 'components/InteractionPanel/InteractionPanel';
+import BehaviorPanel from 'components/BehaviorPanel/BehaviorPanel';
+import Score from 'components/Score';
 
 class Main extends React.Component {
     render() {
@@ -23,7 +24,8 @@ class Main extends React.Component {
                     <GamePanel />
                     <PropertiesPanel />
                 </div>
-                <InteractionPanel />
+                <BehaviorPanel />
+                <Score />
             </div>
         );
     }

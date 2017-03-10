@@ -10,7 +10,8 @@ import * as actions from 'actions';
 
 import pencilBlackImg from 'images/Pencil-50-black.png';
 import pencilWhiteImg from 'images/Pencil-50-white.png';
-import deleteImg from 'images/Delete-50-black.png';
+import deleteBlackImg from 'images/Delete-50-black.png';
+import deleteWhiteImg from 'images/Delete-50-white.png';
 
 class ObjectsListItem extends React.Component {
     constructor(props) {
@@ -23,7 +24,7 @@ class ObjectsListItem extends React.Component {
     handleEditClicked() {
         const { dispatch } = this.props;
         // e.stopPropagation();
-        dispatch(actions.openInteractionPanel());
+        dispatch(actions.openBehaviorPanel());
     }
 
     handleRemoveItem(e) {
@@ -44,11 +45,11 @@ class ObjectsListItem extends React.Component {
         }
         return (
             <li className={isActive ? 'objects-list-item active' : 'objects-list-item'} onClick={this.handleClick}>
-                {body.label !== 'World' && <img className='edit' src={isActive ? pencilWhiteImg : pencilBlackImg} onClick={this.handleEditClicked} alt='edit' /> }
+                {body.label !== 'World' && body.type !== 'constraint' && <img className='edit' src={isActive ? pencilWhiteImg : pencilBlackImg} onClick={this.handleEditClicked} alt='edit' /> }
                 <p className='label'>{body.id}: {body.label}</p>
 
                 {/* Cannot delete the world */}
-                {body.label !== 'World' && <img src={deleteImg} alt={`delete object ${body.id}`} onClick={this.handleRemoveItem} />}
+                {body.label !== 'World' && <img src={isActive ? deleteWhiteImg : deleteBlackImg} alt={`delete object ${body.id}`} onClick={this.handleRemoveItem} />}
             </li>
         );
     }

@@ -14,15 +14,6 @@ export const gameStatesReducer = (state = {}, action) => {
                 newState[id] = (action.id === id);
             });
             return newState;
-            // return Object.keys(state).map(id => {
-            //     const newState = { ...gameState };
-            //     if (gameState.id === action.id) {
-            //         newState.active = true;
-            //     } else {
-            //         newState.active = false;
-            //     }
-            //     return newState;
-            // });
         }
         default:
             return state;
@@ -124,26 +115,45 @@ export const propertiesPanelNeedsRefreshReducer = (state = false, action) => {
     }
 };
 
-export const interactionPanelOpenReducer = (state = false, action) => {
+export const behaviorPanelOpenReducer = (state = false, action) => {
     switch (action.type) {
-        case 'TOGGLE_INTERACTION_PANEL':
+        case 'TOGGLE_BEHAVIOR_PANEL':
             return !state;
-        case 'OPEN_INTERACTION_PANEL':
+        case 'OPEN_BEHAVIOR_PANEL':
             return true;
-        case 'CLOSE_INTERACTION_PANEL':
+        case 'CLOSE_BEHAVIOR_PANEL':
             return false;
         default:
             return state;
     }
 };
 
-export const behaviorsReducer = (state = [], action) => {
+// TODO: Prevent duplicate behaviors
+export const behaviorsReducer = (state = {}, action) => {
     switch (action.type) {
-        case 'ADD_COLLISION_BEHAVIOR':
-            return [
+        case 'ADD_GAME_STATE': {
+            return {
                 ...state,
-                action.collision
-            ];
+                [action.id]: []
+            };
+        }
+        case 'ADD_CONTROL_BEHAVIOR':
+        case 'ADD_COLLISION_BEHAVIOR':
+            return {
+                ...state,
+                [action.id]: state[action.id].concat(action.behavior)
+            };
+        default:
+            return state;
+    }
+};
+
+export const scoreReducer = (state = 0, action) => {
+    switch (action.type) {
+        case 'ADD_SCORE':
+            return state + action.score;
+        case 'RESET_SCORE':
+            return 0;
         default:
             return state;
     }
