@@ -35,7 +35,7 @@ class PrimativesPanel extends React.Component {
     }
 
     render() {
-        const { primativesPanelSelection } = this.props;
+        const { primativesPanelSelection, isPlaying } = this.props;
         const panes = [{title: 'Shapes', items: [{title: 'Rectangle', activeImg: rectImgActive, img: rectImg, active: false}, {title: 'Circle', activeImg: circleImgActive, img: circleImg, active: false}, {title: 'Polygon', activeImg: polyImgActive, img: polyImg, active: false}]}, {title: 'Connectors', items: [{title: 'Spring', activeImg: springImg, img: springImg, active: false}, {title: 'Rod', activeImg: rodImg, img: rodImg, active: false}]}];   //eslint-disable-line
         panes.forEach(pane => {
             pane.items.forEach(item => {
@@ -51,8 +51,12 @@ class PrimativesPanel extends React.Component {
             <PrimativesList itemClickHandler={this.handleClick} key={pane.title} title={pane.title} items={pane.items} />
         );
 
+        let clsName = 'panel primatives-panel';
+        if (isPlaying) {
+            clsName += ' inactive';
+        }
         return (
-            <div className='panel primatives-panel'>
+            <div className={clsName}>
                 {renderPanes()}
             </div>
         );
@@ -61,9 +65,11 @@ class PrimativesPanel extends React.Component {
 
 PrimativesPanel.propTypes = {
     dispatch: React.PropTypes.func.isRequired,
-    primativesPanelSelection: React.PropTypes.string.isRequired
+    primativesPanelSelection: React.PropTypes.string.isRequired,
+    isPlaying: React.PropTypes.bool.isRequired
 };
 
 export default connect(state => ({
-    primativesPanelSelection: state.primativesPanelSelection
+    primativesPanelSelection: state.primativesPanelSelection,
+    isPlaying: state.isPlaying
 }))(PrimativesPanel);

@@ -14,7 +14,7 @@
     .game-canvas {
         width: 100%;
         flex: 1 1 95%;
-        // height: 90%;
+        position: relative;
 
         #game-canvas {
             cursor: grab;

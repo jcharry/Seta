@@ -14,9 +14,16 @@
     display: flex;
     flex-direction: row;
     flex: 1 1 100%;
+    position: relative;
 }
 
 .panel {
     background-color: $panel-color;
+}
+
+.inactive {
+    // background-color: $panel-color-inactive;
+    pointer-events: none;
+    opacity: 0.5;
 }
 

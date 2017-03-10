@@ -6,10 +6,15 @@ import SelectedObjectPane from 'components/SelectedObjectPane/SelectedObjectPane
 
 class PropertiesPanel extends React.Component {
     render() {
-        const { selectedObject, gameObjects } = this.props;
+        const { selectedObject, gameObjects, isPlaying } = this.props;
         const selectedBody = selectedObject === -1 ? null : gameObjects[selectedObject];
+
+        let clsName = 'panel properties-panel';
+        if (isPlaying) {
+            clsName += ' inactive';
+        }
         return (
-            <div className='panel properties-panel'>
+            <div className={clsName}>
                 <ObjectsList gameObjects={gameObjects} />
                 {selectedBody && <SelectedObjectPane selectedObj={selectedBody} /> }
             </div>
@@ -19,11 +24,13 @@ class PropertiesPanel extends React.Component {
 
 PropertiesPanel.propTypes = {
     selectedObject: React.PropTypes.number.isRequired,
-    gameObjects: React.PropTypes.object.isRequired
+    gameObjects: React.PropTypes.object.isRequired,
+    isPlaing: React.PropTypes.bool.isRequired
 };
 
 export default connect(state => ({
     selectedObject: state.selectedObject,
     gameObjects: state.gameObjects,
-    propertiesPanelNeedsRefresh: state.propertiesPanelNeedsRefresh
+    propertiesPanelNeedsRefresh: state.propertiesPanelNeedsRefresh,
+    isPlaying: state.isPlaying
 }))(PropertiesPanel);

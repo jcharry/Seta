@@ -8,12 +8,15 @@
 
 import React from 'react';
 import { connect } from 'react-redux';
-import Matter from 'matter-js';
 import * as actions from 'actions';
-import GameState from 'models/GameState';
+
 import _ from 'underscore';
+
+import Score from 'components/Score';
+
+import Matter from 'matter-js';
+import GameState from 'models/GameState';
 import ControlEvent from 'models/ControlEvent';
-// import camera from 'models/camera';
 
 class GameCanvas extends React.Component {
     componentDidMount() {
@@ -182,8 +185,8 @@ class GameCanvas extends React.Component {
 
     refresh() {
         this.ctx.translate(-this.canvasOffset.x, -this.canvasOffset.y);
-        this.canvasOffset = { x: 0, y: 0 };
         this.activeState.restore();
+        Matter.Mouse.setOffset(this.mouse, this.activeState.camera.view.min);
     }
 
     cleanupScene() {
@@ -558,6 +561,7 @@ class GameCanvas extends React.Component {
         return (
             <div className='game-canvas' ref={elt => { this.container = elt; }}>
                 <canvas ref={elt => { window.canvas = elt; this.canvas = elt; }} id='game-canvas' />
+                <Score />
             </div>
         );
     }

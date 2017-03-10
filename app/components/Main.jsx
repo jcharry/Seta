@@ -10,7 +10,6 @@ import GamePanel from 'components/GamePanel/GamePanel';
 import PrimativesPanel from 'components/PrimativesPanel/PrimativesPanel';
 import PropertiesPanel from 'components/PropertiesPanel/PropertiesPanel';
 import BehaviorPanel from 'components/BehaviorPanel/BehaviorPanel';
-import Score from 'components/Score';
 
 class Main extends React.Component {
     render() {
@@ -25,7 +24,6 @@ class Main extends React.Component {
                     <PropertiesPanel />
                 </div>
                 <BehaviorPanel />
-                <Score />
             </div>
         );
     }

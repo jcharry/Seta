@@ -27,7 +27,7 @@ class StatePanel extends React.Component {
     }
 
     render() {
-        const { gameStates } = this.props;
+        const { gameStates, isPlaying } = this.props;
 
         const renderStateButtons = () => Object.keys(gameStates).map(id => {
             let clsName = 'game-state-button';
@@ -37,8 +37,12 @@ class StatePanel extends React.Component {
             return <button onClick={() => { this.switchGameState(id); }} className={clsName} key={id}>world: {id}</button>;
         });
 
+        let clsName = 'state-panel';
+        if (isPlaying) {
+            clsName += ' inactive';
+        }
         return (
-            <div className='state-panel'>
+            <div className={clsName}>
                 <h2>Worlds</h2>
                 {renderStateButtons()}
                 <button onClick={this.addGameState}>Add</button>
@@ -49,9 +53,11 @@ class StatePanel extends React.Component {
 
 StatePanel.propTypes = {
     dispatch: React.PropTypes.func.isRequired,
-    gameStates: React.PropTypes.object.isRequired
+    gameStates: React.PropTypes.object.isRequired,
+    isPlaying: React.PropTypes.bool.isRequired
 };
 
 export default connect(state => ({
-    gameStates: state.gameStates
+    gameStates: state.gameStates,
+    isPlaying: state.isPlaying
 }))(StatePanel);
