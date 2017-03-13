@@ -9,9 +9,12 @@
 
     .menu-left, .menu-right {
         display: flex;
-        align-items: baseline;
+        align-items: center;
     }
 
+    .menu-left img {
+        height: 50px;
+    }
     .menu-left h1 {
         font-family: 'Barrio', cursive;
         color: orange;

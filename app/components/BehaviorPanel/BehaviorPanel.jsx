@@ -41,6 +41,7 @@ class BehaviorPanel extends React.Component {
             'score',
             'trigger state'
         ];
+
         this.controlActions = [
             'force up',
             'force down',
@@ -72,8 +73,7 @@ class BehaviorPanel extends React.Component {
 
     handleChange(e) {
         switch (e.target.name) {
-            case 'new-collision-obj':
-
+            case 'new-collision-obj': {
                 this.setState({
                     collision: {
                         ...this.state.collision,
@@ -81,7 +81,8 @@ class BehaviorPanel extends React.Component {
                     }
                 });
                 break;
-            case 'new-collision-action':
+            }
+            case 'new-collision-action': {
                 this.setState({
                     collision: {
                         ...this.state.collision,
@@ -89,7 +90,8 @@ class BehaviorPanel extends React.Component {
                     }
                 });
                 break;
-            case 'new-control-key':
+            }
+            case 'new-control-key': {
                 this.setState({
                     control: {
                         ...this.state.control,
@@ -97,7 +99,8 @@ class BehaviorPanel extends React.Component {
                     }
                 });
                 break;
-            case 'new-control-action':
+            }
+            case 'new-control-action': {
                 this.setState({
                     control: {
                         ...this.state.control,
@@ -105,7 +108,8 @@ class BehaviorPanel extends React.Component {
                     }
                 });
                 break;
-            case 'score':
+            }
+            case 'score': {
                 this.setState({
                     collision: {
                         ...this.state.collision,
@@ -113,6 +117,7 @@ class BehaviorPanel extends React.Component {
                     }
                 });
                 break;
+            }
             case 'destroy': {
                 this.setState({
                     collision: {
@@ -120,15 +125,17 @@ class BehaviorPanel extends React.Component {
                         destroy: e.target.value
                     }
                 });
+                break;
             }
             default:
                 break;
         }
     }
 
-    handleDeleteBehavior(id) {
-        console.log(id);
+    handleDeleteBehavior(gameState, id) {
+        const { dispatch } = this.props;
         // TODO: Dispatch action to remove this behavior!
+        dispatch(actions.removeBehavior(gameState, id));
     }
 
 
@@ -154,6 +161,8 @@ class BehaviorPanel extends React.Component {
             case 'control': {
                 break;
             }
+            default:
+                break;
         }
 
         activeBehaviors.forEach(behavior => {
@@ -186,11 +195,19 @@ class BehaviorPanel extends React.Component {
 
             case 'shoot':
                 break;
+            default:
+                break;
         }
 
         const activeStateId = utils.getActiveGameState(gameStates);
         const activeBehaviors = behaviors[activeStateId];
-        const control = new ControlEvent(activeStateId, selectedObject, this.state.control.key, this.state.control.action, resolution);
+        const control = new ControlEvent(
+            activeStateId,
+            selectedObject,
+            this.state.control.key,
+            this.state.control.action,
+            resolution
+        );
 
         const err = this.validateInput(control, activeStateId, activeBehaviors);
 
@@ -271,7 +288,7 @@ class BehaviorPanel extends React.Component {
                     // 1. selectedObject
                     // 2. collisionObject
 
-                    let options = [];
+                    const options = [];
                     if (selectedObject !== -1) {
                         options.push(gameObjects[selectedObject]);
                     }
@@ -298,7 +315,7 @@ class BehaviorPanel extends React.Component {
         const controlBehaviors = [];
         if (activeBehaviors) {
             for (let i = 0; i < activeBehaviors.length; i++) {
-                let b = activeBehaviors[i];
+                const b = activeBehaviors[i];
                 if (b.body === selectedObject) {
                     if (b.type === 'collision') {
                         collisionBehaviors.push(b);
@@ -318,14 +335,16 @@ class BehaviorPanel extends React.Component {
                             {controlBehaviors.map(behavior =>
                                 <li className='behavior-item' key={behavior.id}>
                                     <div>When <span className='highlight'>key {behavior.key}</span> is pressed, this body will <span className='highlight'>{behavior.action}</span></div>
-                                    <img alt='delete behavior' src={deleteImg} onClick={() => { this.handleDeleteBehavior(behavior.id); }} />
+                                    <img alt='delete behavior' src={deleteImg} onClick={() => { this.handleDeleteBehavior(behavior.gameState, behavior.id); }} />
                                 </li>
                             )}
                         </ol>
                     </div>
                 );
             }
-        }
+            return null;
+        };
+
         const renderCollisionBehaviors = () => {
             if (collisionBehaviors.length > 0) {
                 return (
@@ -335,14 +354,15 @@ class BehaviorPanel extends React.Component {
                             {collisionBehaviors.map(behavior =>
                                 <li className='behavior-item' key={behavior.id}>
                                     <div>This body hits <span className='highlight'>body {behavior.collidingBody}</span> which causes <span className='highlight'>{behavior.action}</span> to <span className='highlight'>{behavior.resolution}</span></div>
-                                    <img alt='delete behavior' onClick={() => { this.handleDeleteBehavior(behavior.id); }} src={deleteImg} />
+                                    <img alt='delete behavior' onClick={() => { this.handleDeleteBehavior(behavior.gameState, behavior.id); }} src={deleteImg} />
                                 </li>
                             )}
                         </ol>
                     </div>
                 );
             }
-        }
+            return null;
+        };
 
         return (
             <div className={clsName}>
@@ -392,8 +412,6 @@ class BehaviorPanel extends React.Component {
                         </select>
                         <button onClick={this.handleAddControl}>Add</button>
                     </div>
-                    <ol className='current'>
-                    </ol>
                     {renderControlBehaviors()}
                 </div>
             </div>

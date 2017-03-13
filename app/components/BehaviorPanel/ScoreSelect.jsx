@@ -44,7 +44,7 @@ ScoreSelect.defaultProps = {
 };
 
 ScoreSelect.propTypes = {
-    value: React.PropTypes.number,
+    value: React.PropTypes.string,
     handleChange: React.PropTypes.func.isRequired
 };
 

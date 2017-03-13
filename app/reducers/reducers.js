@@ -138,11 +138,18 @@ export const behaviorsReducer = (state = {}, action) => {
             };
         }
         case 'ADD_CONTROL_BEHAVIOR':
-        case 'ADD_COLLISION_BEHAVIOR':
+        case 'ADD_COLLISION_BEHAVIOR': {
             return {
                 ...state,
                 [action.id]: state[action.id].concat(action.behavior)
             };
+        }
+        case 'REMOVE_BEHAVIOR': {
+            return {
+                ...state,
+                [action.gameState]: state[action.gameState].filter(behavior => !(behavior.id === action.id))
+            };
+        }
         default:
             return state;
     }

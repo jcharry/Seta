@@ -101,6 +101,11 @@ export const addControlBehavior = (id, control) => ({
     behavior: control
 });
 
+export const removeBehavior = (gameState, id) => ({
+    type: 'REMOVE_BEHAVIOR',
+    gameState,
+    id
+});
 
 export const addScore = score => ({
     type: 'ADD_SCORE',

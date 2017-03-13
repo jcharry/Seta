@@ -36,7 +36,11 @@ class PrimativesPanel extends React.Component {
 
     render() {
         const { primativesPanelSelection, isPlaying } = this.props;
-        const panes = [{title: 'Shapes', items: [{title: 'Rectangle', activeImg: rectImgActive, img: rectImg, active: false}, {title: 'Circle', activeImg: circleImgActive, img: circleImg, active: false}, {title: 'Polygon', activeImg: polyImgActive, img: polyImg, active: false}]}, {title: 'Connectors', items: [{title: 'Spring', activeImg: springImg, img: springImg, active: false}, {title: 'Rod', activeImg: rodImg, img: rodImg, active: false}]}];   //eslint-disable-line
+        const panes = [{title: 'Shapes', items: [
+            {title: 'Rectangle', activeImg: rectImgActive, img: rectImg, active: false},
+            {title: 'Circle', activeImg: circleImgActive, img: circleImg, active: false},
+            // {title: 'Polygon', activeImg: polyImgActive, img: polyImg, active: false}
+        ]}, {title: 'Connectors', items: [{title: 'Spring', activeImg: springImg, img: springImg, active: false}, {title: 'Rod', activeImg: rodImg, img: rodImg, active: false}]}];   //eslint-disable-line
         panes.forEach(pane => {
             pane.items.forEach(item => {
                 if (item.title === primativesPanelSelection) {

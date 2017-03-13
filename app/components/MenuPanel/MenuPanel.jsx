@@ -9,6 +9,7 @@ import playIcon from 'images/Play-48-black.png';
 import stopIcon from 'images/Stop-48-black.png';
 import restartIcon from 'images/Restart-48-black.png';
 import pauseIcon from 'images/Pause-48-black.png';
+import setaLogo from 'images/seta-logo@3x.png';
 
 class MenuPanel extends React.Component {
     constructor(props) {
@@ -45,14 +46,14 @@ class MenuPanel extends React.Component {
         return (
             <div className='panel menu-panel'>
                 <div className='menu-left'>
-                    <h1>Seta</h1>
+                    <img src={setaLogo} alt='seta logo'/>
                     <p>new</p>
                     <p>load</p>
                     <p>save</p>
                 </div>
                 <div className='menu-right'>
                     <button className='menu-panel-button' onClick={this.togglePlay}><img src={isPlaying ? pauseIcon : playIcon} alt='play/pause' /></button>
-                    <button className='menu-panel-button' onClick={this.handleStop}><img src={stopIcon} alt='stop' /></button>
+                    {/* <button className='menu-panel-button' onClick={this.handleStop}><img src={stopIcon} alt='stop' /></button> */}
                     <button className='menu-panel-button' onClick={this.handleRestart}><img src={restartIcon} alt='restart' /></button>
                 </div>
             </div>

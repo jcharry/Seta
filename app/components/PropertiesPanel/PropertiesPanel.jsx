@@ -25,7 +25,7 @@ class PropertiesPanel extends React.Component {
 PropertiesPanel.propTypes = {
     selectedObject: React.PropTypes.number.isRequired,
     gameObjects: React.PropTypes.object.isRequired,
-    isPlaing: React.PropTypes.bool.isRequired
+    isPlaying: React.PropTypes.bool.isRequired
 };
 
 export default connect(state => ({

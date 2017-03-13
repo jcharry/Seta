@@ -71,7 +71,7 @@ GameState.prototype.addConstraint = function(type, bodyA, bodyB) {
             stiffness = 1;
             break;
         case 'Spring':
-            stiffness = 0.5;
+            stiffness = 0.01;
             break;
         default:
             break;
@@ -236,13 +236,13 @@ GameState.prototype.bodyFactory = function(type, params) {
         height = params.height === undefined ? 50 : params.height,
         radius = params.radius === undefined ? 50 : params.radius;
 
-    const isFixed = params.isFixed === undefined ? false : true;
+    const isFixed = params.isFixed === undefined ? false : true;    //eslint-disable-line
 
     // Make Body
     let b;
     switch (type) {
         case 'Rectangle':
-            b = Matter.Bodies.rectangle(x, y, width, height, {isStatic: isFixed});
+            b = Matter.Bodies.rectangle(x, y, width, height, { isStatic: isFixed });
             b.scaleX = 1;
             b.scaleY = 1;
             b._creationSize = {
@@ -302,6 +302,9 @@ GameState.prototype.addBodies = function(bodies, isPlaying) {
 GameState.prototype.addBehavior = function(behavior) {
     this.behaviors.push(behavior);
 };
+GameState.prototype.removeBehavior = function(behavior) {
+    this.behaviors = this.behaviors.filter(b => b.id !== behavior);
+};
 
 GameState.prototype.resolveBehavior = function(behavior) {
     const bodyId = behavior.body;
@@ -321,35 +324,50 @@ GameState.prototype.resolveBehavior = function(behavior) {
         case 'force down': {
             const dir = behavior.action.substr(6);
             let yForce = 0;
-            if (dir === 'up') yForce = -0.1;
-            else if (dir === 'down') yForce = 0.1;
-            Matter.Body.applyForce(body, body.position, {x: 0, y: yForce});
+            if (dir === 'up') {
+                yForce = -0.1;
+            } else if (dir === 'down') {
+                yForce = 0.1;
+            }
+
+            Matter.Body.applyForce(body, body.position, { x: 0, y: yForce });
             break;
         }
         case 'force left':
         case 'force right': {
             const dir = behavior.action.substr(6);
             let xForce = 0;
-            if (dir === 'left') xForce = -0.1;
-            else if (dir === 'right') xForce = 0.1;
-            Matter.Body.applyForce(body, body.position, {x: xForce, y: 0});
+            if (dir === 'left') {
+                xForce = -0.1;
+            } else if (dir === 'right') {
+                xForce = 0.1;
+            }
+            Matter.Body.applyForce(body, body.position, { x: xForce, y: 0 });
             break;
         }
         case 'move left':
-        case 'move right':
-            let dir = behavior.action.substr(5);
+        case 'move right': {
+            const dir = behavior.action.substr(5);
             let xChange = 0;
-            if (dir === 'left') xChange = -5;
-            else if (dir === 'right') xChange = 5;
+            if (dir === 'left') {
+                xChange = -5;
+            } else if (dir === 'right') {
+                xChange = 5;
+            }
+            Matter.Body.setPosition(body, { x: body.position.x + xChange, y: body.position.y });
             break;
+        }
         case 'move up':
         case 'move down': {
             // Get direction
-            let dir = behavior.action.substr(5);
+            const dir = behavior.action.substr(5);
             let yChange = 0;
-            if (dir === 'up') yChange = -5;
-            else if (dir === 'down') yChange = 5;
-            Matter.Body.setPosition(body, {x: body.position.x, y: body.position.y + yChange});
+            if (dir === 'up') {
+                yChange = -5;
+            } else if (dir === 'down') {
+                yChange = 5;
+            }
+            Matter.Body.setPosition(body, { x: body.position.x, y: body.position.y + yChange });
             break;
         }
         case 'shoot':

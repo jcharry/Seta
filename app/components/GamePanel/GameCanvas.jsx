@@ -131,10 +131,19 @@ class GameCanvas extends React.Component {
         if (!_.isEqual(prevProps.behaviors, behaviors)) {
             // Guard agasin't behavior creation triggering an exception
             if (prevProps.behaviors[this.activeState.id]) {
+                // If the new behavior list is longer than the previous list ->
+                // we've added a new behavior
                 if (behaviors[this.activeState.id].length > prevProps.behaviors[this.activeState.id].length) {
                     const stateBehaviors = behaviors[this.activeState.id];
                     const newBehavior = stateBehaviors[stateBehaviors.length - 1];
                     this.activeState.addBehavior(newBehavior);
+                } else if (behaviors[this.activeState.id].length < prevProps.behaviors[this.activeState.id].length) {
+                    // Find the removed behavior...
+                    // We've removed a behavior
+                    const prevIds = prevProps.behaviors[this.activeState.id].map(b => b.id);
+                    const currentIds = behaviors[this.activeState.id].map(b => b.id);
+                    let diff = _.difference(prevIds, currentIds)[0];
+                    this.activeState.removeBehavior(diff);
                 }
             }
         }

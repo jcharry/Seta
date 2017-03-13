@@ -45,7 +45,7 @@ class SelectedObjectPane extends React.Component {
             'angle',
             'isStatic',
             'restitution',
-            'force',
+            // 'force',
             'angularVelocity',
             'density',
             'mass',
@@ -168,6 +168,7 @@ class SelectedObjectPane extends React.Component {
         console.log(e);
     }
 
+    // FIXME: This is the messiest...
     updateBodyProperties(e) {
         const { selectedObj } = this.props;
         const propName = e.target.name;
@@ -292,7 +293,6 @@ class SelectedObjectPane extends React.Component {
                         this.setState({
                             [props[0]]: newState
                         });
-
                     } else {
                         let retVal = '';
                         if (e.target.value === '.') {
@@ -306,15 +306,10 @@ class SelectedObjectPane extends React.Component {
                         });
                     }
                 }
+                break;
             }
             default:
                 break;
-        }
-
-        function getVal(input) {
-            if (input === '') {
-                return input;
-            }
         }
     }
 
@@ -342,7 +337,7 @@ class SelectedObjectPane extends React.Component {
 
         return (
             <div className='selected-object-pane'>
-                <h2>Selected Object</h2>
+                <h2>Physical Properties</h2>
                 <p>Object ID: {selectedObj.id}</p>
                 <ul className='selected-object-property-list'>
                     {renderProperties()}
