@@ -47,9 +47,9 @@ class MenuPanel extends React.Component {
             <div className='panel menu-panel'>
                 <div className='menu-left'>
                     <img src={setaLogo} alt='seta logo'/>
-                    <p>new</p>
-                    <p>load</p>
-                    <p>save</p>
+                    {/* <p>new</p> */}
+                    {/* <p>load</p> */}
+                    {/* <p>save</p> */}
                 </div>
                 <div className='menu-right'>
                     <button className='menu-panel-button' onClick={this.togglePlay}><img src={isPlaying ? pauseIcon : playIcon} alt='play/pause' /></button>

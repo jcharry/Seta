@@ -115,3 +115,13 @@ export const addScore = score => ({
 export const resetScore = () => ({
     type: 'RESET_SCORE'
 });
+export const changeFollowBody = (gameState, id) => ({
+    type: 'CHANGE_FOLLOW_BODY',
+    gameState,
+    id
+});
+export const clearFollowBody = (gameState) => ({
+    type: 'CLEAR_FOLLOW_BODY',
+    gameState
+});
+

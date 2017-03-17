@@ -20,6 +20,7 @@ class BehaviorPanel extends React.Component {
         super(props);
 
         this.state = {
+            follow: false,
             collision: {
                 obj: '-1',
                 action: 'score',
@@ -39,7 +40,7 @@ class BehaviorPanel extends React.Component {
         this.collisionActions = [
             'destroy',
             'score',
-            'trigger state'
+            // 'trigger state'
         ];
 
         this.controlActions = [
@@ -47,11 +48,11 @@ class BehaviorPanel extends React.Component {
             'force down',
             'force left',
             'force right',
-            'move up',
-            'move down',
-            'move left',
-            'move right',
-            'shoot'
+            // 'move up',
+            // 'move down',
+            // 'move left',
+            // 'move right',
+            // 'shoot'
         ];
 
         this.keys = 'abcdefghijklmnopqrstuvwxyz1234567890'.split('');
@@ -64,6 +65,20 @@ class BehaviorPanel extends React.Component {
         this.handleAddControl = this.handleAddControl.bind(this);
         this.handleDeleteBehavior = this.handleDeleteBehavior.bind(this);
         this.validateInput = this.validateInput.bind(this);
+        this.handleFollowBodyChange = this.handleFollowBodyChange.bind(this);
+    }
+
+    componentDidUpdate(prevProps) {
+        const { gameStates, followBodies, selectedObject } = this.props;
+        const activeStateId = utils.getActiveGameState(gameStates);
+        // If the selected object changes, make sure the follow body checkbox
+        // is in sync.  We set the state of the checkbox based on whether the
+        // current follow body is what's currently selected
+        if (prevProps.selectedObject !== selectedObject) {
+            this.setState({
+                follow: followBodies[activeStateId] === selectedObject ? true : false
+            });
+        }
     }
 
     handleClose() {
@@ -127,14 +142,30 @@ class BehaviorPanel extends React.Component {
                 });
                 break;
             }
+            case 'follow': {
+                this.handleFollowBodyChange(e.target.checked);
+                this.setState({
+                    ...this.state,
+                    follow: e.target.checked
+                });
+            }
             default:
                 break;
         }
     }
 
+    handleFollowBodyChange(checked) {
+        const { selectedObject, dispatch, gameStates } = this.props;
+        const activeStateId = utils.getActiveGameState(gameStates);
+        if (checked) {
+            dispatch(actions.changeFollowBody(activeStateId, selectedObject));
+        } else {
+            dispatch(actions.clearFollowBody(activeStateId));
+        }
+    }
+
     handleDeleteBehavior(gameState, id) {
         const { dispatch } = this.props;
-        // TODO: Dispatch action to remove this behavior!
         dispatch(actions.removeBehavior(gameState, id));
     }
 
@@ -271,6 +302,7 @@ class BehaviorPanel extends React.Component {
     render() {
         const { behaviorPanelOpen, gameObjects, selectedObject, gameStates, behaviors } = this.props;
         const { collision, control } = this.state;
+        console.log('behaviorPanel re-rendered');
         let clsName = 'interaction-panel';
         if (behaviorPanelOpen && selectedObject !== -1) {
             clsName += ' visible';
@@ -367,6 +399,10 @@ class BehaviorPanel extends React.Component {
         return (
             <div className={clsName}>
                 <img className='close-btn' onClick={this.handleClose} src={closeImg} alt='close button' />
+                <div className='follow'>
+                    <h2>Set Camera to Follow</h2>
+                    <input type='checkbox' checked={this.state.follow} onChange={this.handleChange} name='follow' />
+                </div>
                 <div className='collisions'>
                     <h2>Collisions</h2>
                     <h3>Add New:</h3>
@@ -425,7 +461,8 @@ BehaviorPanel.propTypes = {
     behaviorPanelOpen: React.PropTypes.bool.isRequired,
     gameObjects: React.PropTypes.object.isRequired,
     behaviors: React.PropTypes.object.isRequired,
-    gameStates: React.PropTypes.object.isRequired
+    gameStates: React.PropTypes.object.isRequired,
+    followBodies: React.PropTypes.object.isRequired
 };
 
 export default connect(state => ({
@@ -433,5 +470,6 @@ export default connect(state => ({
     behaviorPanelOpen: state.behaviorPanelOpen,
     gameObjects: state.gameObjects,
     gameStates: state.gameStates,
-    behaviors: state.behaviors
+    behaviors: state.behaviors,
+    followBodies: state.followBodies
 }))(BehaviorPanel);

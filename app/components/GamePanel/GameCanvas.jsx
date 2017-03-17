@@ -113,7 +113,8 @@ class GameCanvas extends React.Component {
             primativesPanelSelection,
             gameObjects,
             behaviors,
-            isPlaying
+            isPlaying,
+            followBodies
         } = this.props;
 
         // Check for isPlaying
@@ -130,19 +131,29 @@ class GameCanvas extends React.Component {
         // Listen for changes in behaviors
         if (!_.isEqual(prevProps.behaviors, behaviors)) {
             // Guard agasin't behavior creation triggering an exception
+            const currentBehaviors = behaviors[this.activeState.id];
+            const previousBehaviors = prevProps.behaviors[this.activeState.id];
             if (prevProps.behaviors[this.activeState.id]) {
+                // Compare list sizes to know if we've added or removed
+                // a behavior
+                const cN = currentBehaviors.length;
+                const pN = previousBehaviors.length;
                 // If the new behavior list is longer than the previous list ->
-                // we've added a new behavior
-                if (behaviors[this.activeState.id].length > prevProps.behaviors[this.activeState.id].length) {
-                    const stateBehaviors = behaviors[this.activeState.id];
-                    const newBehavior = stateBehaviors[stateBehaviors.length - 1];
+                if (cN > pN) {
+                    // we've added a new behavior, pull it off the end of the
+                    // list, since that's where it'll be
+                    // const stateBehaviors = behaviors[this.activeState.id];
+                    const newBehavior = currentBehaviors.slice(-1)[0];
                     this.activeState.addBehavior(newBehavior);
-                } else if (behaviors[this.activeState.id].length < prevProps.behaviors[this.activeState.id].length) {
-                    // Find the removed behavior...
-                    // We've removed a behavior
-                    const prevIds = prevProps.behaviors[this.activeState.id].map(b => b.id);
-                    const currentIds = behaviors[this.activeState.id].map(b => b.id);
-                    let diff = _.difference(prevIds, currentIds)[0];
+                } else if (cN < pN) {
+                    // Find the removed behavior, but we don't know where
+                    // in the list it was, so we must search!
+                    const prevIds = previousBehaviors.map(b => b.id);
+                    const currentIds = currentBehaviors.map(b => b.id);
+
+                    // Find items that exist in prevIds, but not in currentIds
+                    // thanks, underscore
+                    const diff = _.difference(prevIds, currentIds)[0];
                     this.activeState.removeBehavior(diff);
                 }
             }
@@ -166,6 +177,9 @@ class GameCanvas extends React.Component {
 
         // Have the game objects changed?
         if (!_.isEqual(prevProps.gameObjects, gameObjects)) {
+            // Don't worry about adding an object (since that is
+            // taken care of by the gameState and canvas mouse
+            // events
             const pkeys = Object.keys(prevProps.gameObjects);
             const keys = Object.keys(gameObjects);
 
@@ -178,10 +192,6 @@ class GameCanvas extends React.Component {
                     this.activeState.removeGameObject(type, diff[0]);
                 }
             }
-
-            // Don't worry about adding an object (since that is
-            // taken care of by the gameState and canvas mouse
-            // events
         }
 
         // If the Selected Primative is changed and it's not a constraint,
@@ -190,10 +200,25 @@ class GameCanvas extends React.Component {
         if (!_.isEqual(prevProps.primativesPanelSelection, primativesPanelSelection) && primativesPanelSelection !== 'Rope' && primativesPanelSelection !== 'Spring' && primativesPanelSelection !== 'Rod') {
             this.selectedBodyForConstraint = null;
         }
+
+        // Follow bodies
+        if (!_.isEqual(prevProps.followBodies, followBodies)) {
+            console.log('follow body changed');
+            const followId = followBodies[this.activeState.id];
+            if (followId === -1) {
+                this.activeState.camera.follow = null;
+            } else {
+                this.activeState.camera.follow = gameObjects[followId];
+            }
+        }
     }
 
+    /**
+     * Refresh the game state,
+     * i.e. reset all objects to their initial positions
+    */
     refresh() {
-        this.ctx.translate(-this.canvasOffset.x, -this.canvasOffset.y);
+        // this.ctx.translate(-this.canvasOffset.x, -this.canvasOffset.y);
         this.activeState.restore();
         Matter.Mouse.setOffset(this.mouse, this.activeState.camera.view.min);
     }
@@ -278,8 +303,6 @@ class GameCanvas extends React.Component {
 
         this.canvas.addEventListener('mousedown', () => {
             const { primativesPanelSelection } = this.props;
-            this.isMouseDown = true;
-            console.log('mousedown at ', this.mouse.mousedownPosition);
 
             // Make sure behaviorPanel is closed
             dispatch(actions.closeBehaviorPanel());
@@ -329,8 +352,10 @@ class GameCanvas extends React.Component {
                 }
             }                                                       //eslint-disable-line
 
-            // 3. Nothing Selected, query for bodies
+            // 3. Nothing Selected, query for bodies, or get ready to pan the
+            //    world
             else {
+                this.isMouseDown = true;
                 const bodies = Matter.Query.point(this.activeState.bodies, this.mouse.mousedownPosition);
                 if (bodies.length > 0) {
                     const b = bodies[0];
@@ -408,8 +433,8 @@ class GameCanvas extends React.Component {
 
         // Make sure we dont' move outside the bounds of the world
         const bounds = camera.checkBounds(dx, dy);
-        if (bounds.x) { dx = 0; }
-        if (bounds.y) { dy = 0; }
+        if (bounds.hitX) { dx = 0; }
+        if (bounds.hitY) { dy = 0; }
 
         camera.translateView(-dx, -dy);
 
@@ -589,7 +614,8 @@ GameCanvas.propTypes = {
     needsNewGameState: React.PropTypes.bool.isRequired,
     gameStates: React.PropTypes.object.isRequired,
     gameObjects: React.PropTypes.object.isRequired,
-    behaviors: React.PropTypes.object.isRequired
+    behaviors: React.PropTypes.object.isRequired,
+    followBodies: React.PropTypes.object.isRequired
 };
 
 export default connect(state => ({
@@ -600,5 +626,6 @@ export default connect(state => ({
     needsNewGameState: state.needsNewGameState,
     gameStates: state.gameStates,
     gameObjects: state.gameObjects,
-    behaviors: state.behaviors
+    behaviors: state.behaviors,
+    followBodies: state.followBodies
 }))(GameCanvas);

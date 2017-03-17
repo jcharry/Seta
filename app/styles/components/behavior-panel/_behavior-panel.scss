@@ -69,5 +69,18 @@
         max-height: 80px;
         overflow-y: auto;
     }
+    .follow {
+        display: flex;
+        align-items: center;
+
+        input {
+            margin-left: 30px;
+        }
+    }
+
+    .follow, .collisions {
+        border-bottom: 1px solid $panel-color;
+        padding-bottom: 1rem;
+    }
 }
 

@@ -40,32 +40,25 @@ Camera.reset = function() {
     this.view.max.y = this.height;
 };
 
-// Camera.worldToView = function(worldX, worldY) {
-//
-// };
-
 Camera.checkBounds = function(dx, dy) {
     const view = this.view;
     const world = this.world;
-    let x = false;
-    let y = false;
+    let hitX = false;
+    let hitY = false;
     if (view.min.x - dx < world.bounds.min.x) {
-        x = true;
+        hitX = true;
     }
     if (view.max.x - dx > world.bounds.max.x) {
-        x = true;
+        hitX = true;
     }
     if (view.min.y - dy < world.bounds.min.y) {
-        y = true;
+        hitY = true;
     }
     if (view.max.y - dy > world.bounds.max.y) {
-        y = true;
+        hitY = true;
     }
 
-    return {
-        x,
-        y
-    };
+    return { hitX, hitY };
 };
 
 Camera.lookAt = function(worldX, worldY) {
@@ -74,12 +67,12 @@ Camera.lookAt = function(worldX, worldY) {
     // calculate view translation so that world coords are in center of view
     // Trsnalste to (0, 0), then to body center,
     // then back half the view size
-    let dx = -this.view.min.x + worldX - this.width / 2;
-    let dy = -this.view.min.y + worldY - this.height / 2;
+    let dx = worldX - this.view.min.x - (this.width / 2);
+    let dy = worldY - this.view.min.y - (this.height / 2);
 
     const bounds = this.checkBounds(-dx, -dy);
-    if (bounds.x) { dx = 0; }
-    if (bounds.y) { dy = 0; }
+    if (bounds.hitX) { dx = 0; }
+    if (bounds.hitY) { dy = 0; }
 
     this.translateView(dx, dy);
 };

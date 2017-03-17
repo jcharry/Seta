@@ -165,3 +165,30 @@ export const scoreReducer = (state = 0, action) => {
             return state;
     }
 };
+
+export const followBodiesReducer = (state = {}, action) => {
+    switch (action.type) {
+        case 'CHANGE_FOLLOW_BODY': {
+            let gs = action.gameState;
+            let currFollow = state[gs];
+            let follow;
+            if (currFollow === action.id) {
+                follow = -1;
+            } else {
+                follow = action.id;
+            }
+            return {
+                ...state,
+                [action.gameState]: follow
+            };
+        }
+        case 'CLEAR_FOLLOW_BODY': {
+            return {
+                ...state,
+                [action.gameState]: -1
+            };
+        }
+        default:
+            return state;
+    }
+};

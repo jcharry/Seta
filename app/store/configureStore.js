@@ -14,7 +14,8 @@ import {
     propertiesPanelNeedsRefreshReducer,
     behaviorPanelOpenReducer,
     behaviorsReducer,
-    scoreReducer
+    scoreReducer,
+    followBodiesReducer
 } from '../reducers/reducers';
 
 const configure = (initialState = {}) => {
@@ -30,7 +31,8 @@ const configure = (initialState = {}) => {
         propertiesPanelNeedsRefresh: propertiesPanelNeedsRefreshReducer,
         behaviorPanelOpen: behaviorPanelOpenReducer,
         behaviors: behaviorsReducer,
-        score: scoreReducer
+        score: scoreReducer,
+        followBodies: followBodiesReducer
     });
 
     const store = redux.createStore(reducer, initialState, redux.compose(
