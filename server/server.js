@@ -4,7 +4,7 @@ const path = require('path');
 const app = express();
 
 // Heroku passes a port # as an environment var
-const PORT = process.env.PORT || 9090;
+const PORT = process.env.PORT || 8093;
 
 app.use(express.static('dist'));
 
