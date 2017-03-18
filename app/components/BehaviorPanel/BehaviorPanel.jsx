@@ -1,4 +1,6 @@
 /* TODO: This component is a mess */
+// TODO: If an object is removed, the behaviors attached to the object also
+// need to be cleaned up
 
 import React from 'react';
 import { connect } from 'react-redux';
@@ -303,12 +305,12 @@ class BehaviorPanel extends React.Component {
         const { behaviorPanelOpen, gameObjects, selectedObject, gameStates, behaviors } = this.props;
         const { collision, control } = this.state;
         console.log('behaviorPanel re-rendered');
-        let clsName = 'interaction-panel';
-        if (behaviorPanelOpen && selectedObject !== -1) {
-            clsName += ' visible';
-        } else {
-            clsName += ' hidden';
-        }
+        let clsName = 'interaction-panel visible';
+        // if (behaviorPanelOpen && selectedObject !== -1) {
+        // clsName += ' visible';
+        // } else {
+        //     clsName += ' hidden';
+        // }
 
         const renderCollisionInputs = () => {
             switch (collision.action) {

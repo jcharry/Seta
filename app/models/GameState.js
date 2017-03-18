@@ -15,6 +15,7 @@ function GameState(dispatch, canvas) {
     this.world.originalProperties = {};
     this.constraints = [];
     this.initialBodies = [];
+    this.initialConstraints = [];
     this.id = stateId++;
     this.dispatch = dispatch;
     this.active = false;
@@ -83,6 +84,7 @@ GameState.prototype.addConstraint = function(type, bodyA, bodyB) {
     });
 
     this.constraints.push(c);
+    this.initialConstraints.push(c);
     Matter.World.add(this.world, c);
     // TODO: Dispatch an action to
     // keep track of the constraint
@@ -309,81 +311,116 @@ GameState.prototype.removeBehavior = function(behavior) {
 GameState.prototype.resolveBehavior = function(behavior) {
     const bodyId = behavior.body;
     const body = this.bodies.filter(b => b.id === bodyId)[0];
-    switch (behavior.action) {
-        case 'score': {
-            console.log('score fired');
-            this.dispatch(actions.addScore(parseInt(behavior.resolution, 10)));
-            break;
-        }
-        case 'destroy': {
-            console.log('destroy fired');
-            this.removeGameObject('body', behavior.resolution, true);
-            break;
-        }
-        case 'force up':
-        case 'force down': {
-            const dir = behavior.action.substr(6);
-            let yForce = 0;
-            if (dir === 'up') {
-                yForce = -0.1;
-            } else if (dir === 'down') {
-                yForce = 0.1;
-            }
 
-            Matter.Body.applyForce(body, body.position, { x: 0, y: yForce });
-            break;
-        }
-        case 'force left':
-        case 'force right': {
-            const dir = behavior.action.substr(6);
-            let xForce = 0;
-            if (dir === 'left') {
-                xForce = -0.1;
-            } else if (dir === 'right') {
-                xForce = 0.1;
+    if (body) {
+        switch (behavior.action) {
+            case 'score': {
+                console.log('score fired');
+                this.dispatch(actions.addScore(parseInt(behavior.resolution, 10)));
+                break;
             }
-            Matter.Body.applyForce(body, body.position, { x: xForce, y: 0 });
-            break;
-        }
-        case 'move left':
-        case 'move right': {
-            const dir = behavior.action.substr(5);
-            let xChange = 0;
-            if (dir === 'left') {
-                xChange = -5;
-            } else if (dir === 'right') {
-                xChange = 5;
+            case 'destroy': {
+                console.log('destroy fired');
+                this.removeGameObject('body', behavior.resolution, true);
+                break;
             }
-            Matter.Body.setPosition(body, { x: body.position.x + xChange, y: body.position.y });
-            break;
-        }
-        case 'move up':
-        case 'move down': {
-            // Get direction
-            const dir = behavior.action.substr(5);
-            let yChange = 0;
-            if (dir === 'up') {
-                yChange = -5;
-            } else if (dir === 'down') {
-                yChange = 5;
+            case 'force up':
+            case 'force down': {
+                const dir = behavior.action.substr(6);
+                let yForce = 0;
+                if (dir === 'up') {
+                    yForce = -0.1;
+                } else if (dir === 'down') {
+                    yForce = 0.1;
+                }
+
+                Matter.Body.applyForce(body, body.position, { x: 0, y: yForce });
+                break;
             }
-            Matter.Body.setPosition(body, { x: body.position.x, y: body.position.y + yChange });
-            break;
+            case 'force left':
+            case 'force right': {
+                const dir = behavior.action.substr(6);
+                let xForce = 0;
+                if (dir === 'left') {
+                    xForce = -0.1;
+                } else if (dir === 'right') {
+                    xForce = 0.1;
+                }
+                Matter.Body.applyForce(body, body.position, { x: xForce, y: 0 });
+                break;
+            }
+            case 'move left':
+            case 'move right': {
+                const dir = behavior.action.substr(5);
+                let xChange = 0;
+                if (dir === 'left') {
+                    xChange = -5;
+                } else if (dir === 'right') {
+                    xChange = 5;
+                }
+                Matter.Body.setPosition(body, { x: body.position.x + xChange, y: body.position.y });
+                break;
+            }
+            case 'move up':
+            case 'move down': {
+                // Get direction
+                const dir = behavior.action.substr(5);
+                let yChange = 0;
+                if (dir === 'up') {
+                    yChange = -5;
+                } else if (dir === 'down') {
+                    yChange = 5;
+                }
+                Matter.Body.setPosition(body, { x: body.position.x, y: body.position.y + yChange });
+                break;
+            }
+            case 'shoot':
+                break;
+            default:
+                console.log('no behavior resolution defined, see GameState.resolveBehavior');
+                break;
         }
-        case 'shoot':
-            break;
-        default:
-            console.log('no behavior resolution defined, see GameState.resolveBehavior');
-            break;
     }
 };
 
+GameState.prototype.findConstraints = function(body) {
+    return this.constraints.filter(constraint => body.id === constraint.bodyA.id || body.id === constraint.bodyB.id);
+};
+
+GameState.prototype.findBehaviors = function(body) {
+    return this.behaviors.filter(b => b.body === body.id);
+};
+
+/**
+ * shouldKeep - represents if the item should remain in the initial list or not
+ * TODO: When we remove a body, we also have to remove any attached constraints
+ * and any behaviors
+ */
 GameState.prototype.removeGameObject = function(type, id, shouldKeep) {
     shouldKeep = shouldKeep === undefined ? false : true;   //eslint-disable-line
     switch (type) {
         case 'body':
             this.bodies = this.bodies.filter((body, i) => {
                 if (body.id === parseInt(id, 10)) {
+                    // Find constraints
+                    const constraints = this.findConstraints(body);
+                    // Remove constraints from the World and the redux
+                    // store
+                    constraints.forEach(c => {
+                        // this.dispatch(actions.removeGameObject(c.id));
+                        this.removeGameObject('constraint', c.id, shouldKeep);
+                    });
+
+                    // Find and remove behaviors associated with that body.
+                    // But
+                    const behaviors = this.findBehaviors(body);
+                    behaviors.forEach(b => {
+                        if (!shouldKeep) {
+                            this.dispatch(actions.removeBehavior(this.id, b.id));
+                            this.behaviors.splice(this.behaviors.indexOf(b), 1);
+                        }
+                    });
+
                     Matter.World.remove(this.world, body);
                     if (this.initialBodies.indexOf(body) !== -1 && shouldKeep === false) {
                         this.initialBodies.splice(i, 1);
@@ -392,11 +429,18 @@ GameState.prototype.removeGameObject = function(type, id, shouldKeep) {
                 }
                 return true;
             });
+            // TODO: Loop through contraints and remove ones with a matching
+            // body
+            // TODO: Loop through behaviors and remove the ones matching the
+            // body
             break;
         case 'constraint':
-            this.constraints = this.constraints.filter(constraint => {
+            this.constraints = this.constraints.filter((constraint, i) => {
                 if (constraint.id === parseInt(id, 10)) {
                     Matter.World.remove(this.world, constraint);
+                    if (this.initialConstraints.indexOf(constraint) !== -1 && shouldKeep === false) {
+                        this.initialConstraints.splice(i, 1);
+                    }
                     return false;
                 }
                 return true;
@@ -436,9 +480,10 @@ GameState.prototype.restore = function() {
         this.dispatch(actions.addGameObject(body));
     });
 
-    this.constraints.forEach(constraint => {
-        Matter.World.add(this.world, constraint);
+    this.initialConstraints.forEach(constraint => {
         if (constraint.type !== 'mouseConstraint') {
+            Matter.World.add(this.world, constraint);
+            this.constraints.push(constraint);
             this.dispatch(actions.addGameObject(constraint));
         }
     });

@@ -15,7 +15,7 @@ require('app/styles/main.scss');
 const store = configure();
 
 // XXX: DEBUGGING - CAN REMOVE
-window._DEBUG = true;
+window._DEBUG = false;
 
 ReactDOM.render(
     <div>

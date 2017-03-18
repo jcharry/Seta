@@ -5,6 +5,7 @@
  * Distributed under terms of the MIT license.
  */
 import React from 'react';
+import { connect } from 'react-redux';
 import MenuPanel from 'components/MenuPanel/MenuPanel';
 import GamePanel from 'components/GamePanel/GamePanel';
 import PrimativesPanel from 'components/PrimativesPanel/PrimativesPanel';
@@ -13,6 +14,7 @@ import BehaviorPanel from 'components/BehaviorPanel/BehaviorPanel';
 
 class Main extends React.Component {
     render() {
+        const { behaviorPanelOpen } = this.props;
         return (
             <div className='main'>
                 <div className='top'>
@@ -23,10 +25,12 @@ class Main extends React.Component {
                     <GamePanel />
                     <PropertiesPanel />
                 </div>
-                <BehaviorPanel />
+                {behaviorPanelOpen && <BehaviorPanel />}
             </div>
         );
     }
 }
 
-export default Main;
+export default connect(state => ({
+    behaviorPanelOpen: state.behaviorPanelOpen
+}))(Main);
