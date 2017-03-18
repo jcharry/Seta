@@ -397,7 +397,9 @@ GameState.prototype.findBehaviors = function(body) {
  * and any behaviors
  */
 GameState.prototype.removeGameObject = function(type, id, shouldKeep) {
-    shouldKeep = shouldKeep === undefined ? false : true;   //eslint-disable-line
+    if (shouldKeep === undefined || shouldKeep === null) {
+        shouldKeep = false;
+    }
     switch (type) {
         case 'body':
             this.bodies = this.bodies.filter((body, i) => {
@@ -440,6 +442,7 @@ GameState.prototype.removeGameObject = function(type, id, shouldKeep) {
                     Matter.World.remove(this.world, constraint);
                     if (this.initialConstraints.indexOf(constraint) !== -1 && shouldKeep === false) {
                         this.initialConstraints.splice(i, 1);
+                        this.dispatch(actions.removeGameObject(constraint.id));
                     }
                     return false;
                 }
@@ -480,6 +483,7 @@ GameState.prototype.restore = function() {
         this.dispatch(actions.addGameObject(body));
     });
 
+    this.constraints = [];
     this.initialConstraints.forEach(constraint => {
         if (constraint.type !== 'mouseConstraint') {
             Matter.World.add(this.world, constraint);
