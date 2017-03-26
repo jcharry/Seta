@@ -13,6 +13,7 @@ class SelectedObjectPane extends React.Component {
         this.handleInputChange = this.handleInputChange.bind(this);
         this.updateBodyProperties = this.updateBodyProperties.bind(this);
         this.updateConstraintProperties = this.updateConstraintProperties.bind(this);
+        this.handleTextInput = this.handleTextInput.bind(this);
         this.constructState = this.constructState.bind(this);
 
         this.readableLabels = {
@@ -34,8 +35,28 @@ class SelectedObjectPane extends React.Component {
             friction: 'Friction',
             frictionAir: 'Air Friction',
             frictionStatic: 'Static Friction',
-            restitution: 'Bounciness'
+            restitution: 'Bounciness',
+            bounds: 'World Bounds'
         };
+
+        this.inputTruncation = {
+            position: 2,
+            velocity: 2,
+            size: 2,
+            angle: 2,
+            angularVelocity: 2,
+            length: 2,
+            bounds: 2
+            // density: 4,
+            // mass: 2,
+            // inertia: 2,
+            // gravity: 2,
+            // stiffness: 0,
+            // friction: 2,
+            // frictionAir: 4,
+            // frictionStatic: 2,
+            // restitution: 2,
+        }
 
         // initialize state with current properties
         this.visibleBodyProperties = [
@@ -61,7 +82,8 @@ class SelectedObjectPane extends React.Component {
 
         this.visibleWorldProperties = [
             'gravity',
-            'hasAir'
+            'hasAir',
+            'bounds'
         ];
 
         this.state = this.constructState();
@@ -168,7 +190,138 @@ class SelectedObjectPane extends React.Component {
         console.log(e);
     }
 
-    // FIXME: This is the messiest...
+    // FIXME: Needs some help
+    // 1. Generalize updating individual properties as much as possible
+    handleTextInput(e) {
+        const { selectedObj } = this.props;
+        const propName = e.target.name;
+        // Data was entered in a text box.  Only proceed if the value
+        // can be parsed into a number
+        const val = parseFloat(e.target.value);
+        if (val || val === 0) {
+            // Vector properties (like position, velocity)
+            // return a name with a colon separating the
+            // prop name and the component name - e.g.
+            // position:x
+            if (propName.indexOf(':') !== -1) {
+                let props = propName.split(':');
+                switch (propName) {
+                    // TODO: This could be optimized, but no need
+                    // right now, it works fine...
+                    case 'position:y':
+                    case 'position:x':
+                    case 'velocity:y':
+                    case 'velocity:x': {
+                        const newState = { ...selectedObj[props[0]] };
+                        newState[props[1]] = val.toFixed(this.inputTruncation[props[0]]);
+                        GameState.setInitialProperty(selectedObj, props[0], newState);
+                        this.setState({
+                            [props[0]]: newState
+                        });
+                        break;
+                    }
+                    case 'size:radius':
+                    case 'size:width':
+                    case 'size:height': {
+                        // Don't accept 0 or negative values
+                        if (val <= 0) {
+                            break;
+                        }
+                        // Calculate scale (use original size)
+                        // let scaleX, scaleY, scaleR;
+                        if (selectedObj.label === 'Circle Body') {
+                            GameState.setInitialProperty(selectedObj, 'size', { radius: val });
+                            this.setState({
+                                size: { radius: val }
+                            });
+                        } else if (selectedObj.label === 'Rectangle Body') {
+                            // Check if width or height changed
+                            if (props[1] === 'width') {
+                                GameState.setInitialProperty(selectedObj, 'size', { width: val, height: selectedObj.size.height });
+                                this.setState({
+                                    size: { width: val, height: selectedObj.size.height }
+                                });
+                            } else {
+                                // Must be height
+                                GameState.setInitialProperty(selectedObj, 'size', { width: selectedObj.size.width, height: val });
+                                this.setState({
+                                    size: { width: selectedObj.size.width, height: val }
+                                });
+                            }
+                        }
+                        break;
+                    }
+
+                    // WORLD PROPERTIES
+                    case 'gravity:x':
+                    case 'gravity:y': {
+                        const grav = { ...selectedObj.gravity };
+                        grav[props[1]] = val;
+                        selectedObj.gravity = grav;
+                        this.setState({
+                            gravity: grav
+                        });
+                        break;
+                    }
+                    case 'bounds:min:x':
+                    case 'bounds:min:y':
+                    case 'bounds:max:x':
+                    case 'bounds:max:y': {
+                        console.log(propName, val);
+                        let valueToChange = props[2];
+                        let minOrMax = props[1];
+                        let newBounds = {
+                            min: {...this.state.bounds.min},
+                            max: {...this.state.bounds.max}
+                        };
+                        newBounds[minOrMax][valueToChange] = val;
+
+                        // Update the world itself
+                        selectedObj.bounds = newBounds;
+
+                        this.setState({
+                            bounds: newBounds
+                        });
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            } else {
+                GameState.setInitialProperty(selectedObj, propName, val);
+                this.setState({
+                    [propName]: val
+                });
+            }
+        } else {
+            // Input cannot be coerced into a number
+            // set the state, but don't set any body properties
+            // propName could be of the form 'velocity:x' or just
+            // 'angularVelocity'
+            if (propName.indexOf(':') !== -1) {
+                const props = propName.split(':');
+                const newState = { ...selectedObj[props[0]] };
+                let newValue = e.target.value;
+                switch (props.length) {
+                    case 2:
+                        newState[props[1]] = newValue;
+                        break;;
+                    case 3:
+                        newState[props[1]][props[2]] = newValue;
+                        break;
+                }
+                this.setState({
+                    [props[0]]: newState
+                });
+            } else {
+                let newState = e.target.value;
+                this.setState({
+                    [propName]: newState
+                });
+            }
+        }
+    }
+
     updateBodyProperties(e) {
         const { selectedObj } = this.props;
         const propName = e.target.name;
@@ -178,7 +331,6 @@ class SelectedObjectPane extends React.Component {
                     console.log('switching hasAir', e.target.checked);
                     GameState.setAirFriction(selectedObj, e.target.checked);
                 } else {
-                    // dispatch()
                     GameState.setInitialProperty(selectedObj, propName, e.target.checked);
                 }
 
@@ -188,124 +340,7 @@ class SelectedObjectPane extends React.Component {
                 break;
             }
             case 'text': {
-                // Data was entered in a text box.  Only proceed if the value
-                // can be parsed into a number
-                const val = parseFloat(e.target.value);
-                if (val || val === 0) {
-                    // Vector properties (like position, velocity)
-                    // return a name with a colon separating the
-                    // prop name and the component name - e.g.
-                    // position:x
-                    if (propName.indexOf(':') !== -1) {
-                        switch (propName) {
-                            // TODO: This could be optimized, but no need
-                            // right now, it works fine...
-                            case 'position:y':
-                            case 'position:x': {
-                                const newPos = { ...selectedObj.position };
-                                newPos[propName[propName.length - 1]] = val;
-                                GameState.setInitialProperty(selectedObj, 'position', newPos);
-                                this.setState({
-                                    position: newPos
-                                });
-                                break;
-                            }
-                            case 'velocity:y':
-                            case 'velocity:x': {
-                                const newVel = { ...selectedObj.velocity };
-                                newVel[propName[propName.length - 1]] = val;
-                                GameState.setInitialProperty(selectedObj, 'velocity', newVel);
-                                this.setState({
-                                    velocity: newVel
-                                });
-                                break;
-                            }
-                            case 'force:x':
-                            case 'force:y': {
-                                break;
-                            }
-                            case 'size:radius':
-                            case 'size:width':
-                            case 'size:height': {
-                                // Don't accept 0 or negative values
-                                if (val <= 0) {
-                                    break;
-                                }
-                                // Calculate scale (use original size)
-                                // let scaleX, scaleY, scaleR;
-                                if (selectedObj.label === 'Circle Body') {
-                                    GameState.setInitialProperty(selectedObj, 'size', { radius: val });
-                                    this.setState({
-                                        size: { radius: val }
-                                    });
-                                } else if (selectedObj.label === 'Rectangle Body') {
-                                    // Check if width or height changed
-                                    if (propName.split(':')[1] === 'width') {
-                                        GameState.setInitialProperty(selectedObj, 'size', { width: val, height: selectedObj.size.height });
-                                        this.setState({
-                                            size: { width: val, height: selectedObj.size.height }
-                                        });
-                                    } else {
-                                        // Must be height
-                                        GameState.setInitialProperty(selectedObj, 'size', { width: selectedObj.size.width, height: val });
-                                        this.setState({
-                                            size: { width: selectedObj.size.width, height: val }
-                                        });
-                                    }
-                                }
-                                break;
-                            }
-
-                            // WORLD PROPERTIES
-                            case 'gravity:x':
-                            case 'gravity:y': {
-                                const grav = { ...selectedObj.gravity };
-                                grav[propName.slice(-1)] = val;
-                                selectedObj.gravity = grav;
-                                this.setState({
-                                    gravity: grav
-                                });
-                                break;
-                            }
-                            default:
-                                break;
-                        }
-                    } else {
-                        GameState.setInitialProperty(selectedObj, propName, val);
-                        this.setState({
-                            [propName]: val
-                        });
-                    }
-                } else {
-                    // Input cannot be coerced into a number
-                    // set the state, but don't set any body properties
-                    if (propName.indexOf(':') !== -1) {
-                        // We have an object to set
-                        const props = propName.split(':');
-                        const newState = { ...selectedObj[props[0]] };
-                        if (e.target.value === '') {
-                            newState[props[1]] = '';
-                        } else if (e.target.value === '.') {
-                            newState[props[1]] = '.';
-                        } else if (e.target.value === '0.') {
-                            newState[props[1]] = '0.';
-                        }
-                        this.setState({
-                            [props[0]]: newState
-                        });
-                    } else {
-                        let retVal = '';
-                        if (e.target.value === '.') {
-                            retVal = '.';
-                        } else if (e.target.value === '0.') {
-                            retVal = '0.';
-                        }
-                        // just a primative
-                        this.setState({
-                            [propName]: retVal
-                        });
-                    }
-                }
+                this.handleTextInput(e);
                 break;
             }
             default:
@@ -320,13 +355,13 @@ class SelectedObjectPane extends React.Component {
         const renderProperties = () => {
             switch (selectedObj.type) {
                 case 'body':
-                    return (this.visibleBodyProperties.map(p => <SelectedObjectPaneProperty key={p} label={p} readableLabel={this.readableLabels[p]} value={this.state[p]} handleChange={this.handleInputChange} />));
+                    return (this.visibleBodyProperties.map((p, i) => <SelectedObjectPaneProperty idx={i} key={p} truncateDecimal={this.inputTruncation[p]} label={p} readableLabel={this.readableLabels[p]} value={this.state[p]} handleChange={this.handleInputChange} />));
                 case 'constraint': {
-                    return (this.visibleConstraintProperties.map(p => <SelectedObjectPaneProperty key={p} label={p} readableLabel={this.readableLabels[p]} value={this.state[p]} handleChange={this.handleInputChange} />));
+                    return (this.visibleConstraintProperties.map((p, i) => <SelectedObjectPaneProperty idx={i} key={p} truncateDecimal={this.inputTruncation[p]} label={p} readableLabel={this.readableLabels[p]} value={this.state[p]} handleChange={this.handleInputChange} />));
                 }
                 case 'composite': {
                     if (selectedObj.label === 'World') {
-                        return (this.visibleWorldProperties.map(p => <SelectedObjectPaneProperty key={p} label={p} readableLabel={this.readableLabels[p]} value={this.state[p]} handleChange={this.handleInputChange} ignoreProps={['scale']} />));
+                        return this.visibleWorldProperties.map((p, i) => <SelectedObjectPaneProperty idx={i} key={p} truncateDecimal={this.inputTruncation[p]} label={p} readableLabel={this.readableLabels[p]} value={this.state[p]} handleChange={this.handleInputChange} ignoreProps={['scale']} />);
                     }
                     return <div />;
                 }

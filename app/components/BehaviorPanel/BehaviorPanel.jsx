@@ -1,6 +1,7 @@
+/* eslint
+    "class-methods-use-this": "off"
+*/
 /* TODO: This component is a mess */
-// TODO: If an object is removed, the behaviors attached to the object also
-// need to be cleaned up
 
 import React from 'react';
 import { connect } from 'react-redux';
@@ -21,13 +22,17 @@ class BehaviorPanel extends React.Component {
     constructor(props) {
         super(props);
 
+        // const { gameStates } = this.props;
+        // const activeStateId = utils.getActiveGameState(gameStates);
+        // const otherGameStates = Object.keys(gameStates).map(key => parseInt(key, 10)).filter(id => id !== activeStateId);
+
         this.state = {
             follow: false,
             collision: {
                 obj: '-1',
                 action: 'score',
                 score: '-1',
-                triggerState: '-1',
+                changeWorld: '-1',
                 destroy: '-1',
                 resolution: ''
             },
@@ -42,14 +47,14 @@ class BehaviorPanel extends React.Component {
         this.collisionActions = [
             'destroy',
             'score',
-            // 'trigger state'
+            'change world'
         ];
 
         this.controlActions = [
             'force up',
             'force down',
             'force left',
-            'force right',
+            'force right'
             // 'move up',
             // 'move down',
             // 'move left',
@@ -77,8 +82,8 @@ class BehaviorPanel extends React.Component {
         // is in sync.  We set the state of the checkbox based on whether the
         // current follow body is what's currently selected
         if (prevProps.selectedObject !== selectedObject) {
-            this.setState({
-                follow: followBodies[activeStateId] === selectedObject ? true : false
+            this.setState({ //eslint-disable-line
+                follow: followBodies[activeStateId] === selectedObject
             });
         }
     }
@@ -150,6 +155,16 @@ class BehaviorPanel extends React.Component {
                     ...this.state,
                     follow: e.target.checked
                 });
+                break;
+            }
+            case 'change world': {
+                this.setState({
+                    collision: {
+                        ...this.state.collision,
+                        changeWorld: e.target.value
+                    }
+                });
+                break;
             }
             default:
                 break;
@@ -210,7 +225,7 @@ class BehaviorPanel extends React.Component {
 
     handleAddControl() {
         const { dispatch, selectedObject, gameStates, behaviors } = this.props;
-        let resolution = this.state.control.action;
+        const resolution = this.state.control.action;
 
         switch (this.state.control.action) {
             case 'force right':
@@ -258,8 +273,8 @@ class BehaviorPanel extends React.Component {
             case 'score':
                 resolution = this.state.collision.score;
                 break;
-            case 'trigger state':
-                resolution = this.state.collision.triggerState;
+            case 'change world':
+                resolution = this.state.collision.changeWorld;
                 break;
             case 'destroy':
                 resolution = this.state.collision.destroy;
@@ -302,10 +317,11 @@ class BehaviorPanel extends React.Component {
     }
 
     render() {
-        const { behaviorPanelOpen, gameObjects, selectedObject, gameStates, behaviors } = this.props;
-        const { collision, control } = this.state;
-        console.log('behaviorPanel re-rendered');
-        let clsName = 'interaction-panel visible';
+        const { gameObjects, selectedObject, gameStates, behaviors } = this.props;
+        const { collision } = this.state;
+        const activeStateId = utils.getActiveGameState(gameStates);
+
+        const clsName = 'interaction-panel visible';
         // if (behaviorPanelOpen && selectedObject !== -1) {
         // clsName += ' visible';
         // } else {
@@ -331,18 +347,29 @@ class BehaviorPanel extends React.Component {
                     }
                     return (<DestroySelect selected={selectedObject} value={this.state.collision.destroy} options={options} handleChange={this.handleChange} />);
                 }
+                case 'change world': {
+                    // let worldOptions
+                    const otherGameStates = Object.keys(gameStates)
+                        .map(key => parseInt(key, 10))
+                        .filter(id => id !== activeStateId);
+                    return (
+                        <select name='change world' value={this.state.collision.changeWorld} onChange={this.handleChange}>
+                            {
+                            [<option value='-1' key='-1'>---</option>].concat(otherGameStates.map(id =>
+                                <option value={id} key={`world${id}`}>{id}</option>))
+                            }
+                        </select>
+                    );
+                }
                 case 'move':
                     return <div />;
                 case 'rotate':
-                    return <div />;
-                case 'trigger state':
                     return <div />;
                 default:
                     return <div />;
             }
         };
 
-        const activeStateId = utils.getActiveGameState(gameStates);
         const activeBehaviors = behaviors[activeStateId];
 
         const collisionBehaviors = [];
@@ -439,6 +466,7 @@ class BehaviorPanel extends React.Component {
 
                 <div className='controls'>
                     <h2>Controls</h2>
+                    <h3>Add New:</h3>
                     <div className='new'>
                         <p>When</p>
                         <select value={this.state.control.key} onChange={this.handleChange} name='new-control-key'>
@@ -460,7 +488,7 @@ class BehaviorPanel extends React.Component {
 BehaviorPanel.propTypes = {
     selectedObject: React.PropTypes.number.isRequired,
     dispatch: React.PropTypes.func.isRequired,
-    behaviorPanelOpen: React.PropTypes.bool.isRequired,
+    // behaviorPanelOpen: React.PropTypes.bool.isRequired,
     gameObjects: React.PropTypes.object.isRequired,
     behaviors: React.PropTypes.object.isRequired,
     gameStates: React.PropTypes.object.isRequired,

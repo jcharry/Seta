@@ -33,10 +33,7 @@ class GameCanvas extends React.Component {
         this.clearKeyboardEvents = this.clearKeyboardEvents.bind(this);
         this.refresh = this.refresh.bind(this);
         this.cleanupScene = this.cleanupScene.bind(this);
-        this.pan = this.pan.bind(this);
-        // this.follow = this.follow.bind(this);
         this.canvasOffset = { x: 0, y: 0 };
-        this.lastMousePos = { x: 0, y: 0 };
 
         // XXX: FOR DEBUG purposes only, don't forget to remove
         window.seta = this;
@@ -63,12 +60,14 @@ class GameCanvas extends React.Component {
 
             // Capture Matter.Mouse for user interaction
             this.mouse = Matter.Mouse.create(this.canvas);
+            this.mouse.lastMousePos = { x: 0, y: 0 };
 
             // Hold game states data here.  Also store which state is active
             // on redux store
             this.gameStates = {};
             this.activeState = new GameState(dispatch, this.canvas);
             this.gameStates[this.activeState.id] = this.activeState;
+            this.activeState.camera.mouse = this.mouse;
             this.activeState.world.bounds.min.x = -300;
             this.activeState.world.bounds.min.y = -300;
             this.activeState.world.bounds.max.x = width + 300;
@@ -235,6 +234,7 @@ class GameCanvas extends React.Component {
     addGameState() {
         const { dispatch } = this.props;
         const newGameState = new GameState(dispatch, this.canvas);
+        newGameState.camera.mouse = this.mouse;
         this.gameStates[newGameState.id] = newGameState;
         dispatch(actions.needsNewGameState(false));
         dispatch(actions.addGameState(newGameState.id));
@@ -308,8 +308,8 @@ class GameCanvas extends React.Component {
             dispatch(actions.closeBehaviorPanel());
 
             // Keep track of mouse position for panning
-            this.lastMousePos.x = this.mouse.mousedownPosition.x;
-            this.lastMousePos.y = this.mouse.mousedownPosition.y;
+            this.mouse.lastMousePos.x = this.mouse.mousedownPosition.x;
+            this.mouse.lastMousePos.y = this.mouse.mousedownPosition.y;
 
             // Handle a few different cases
             // 1. If user clicks while an object is selected in the left panel,
@@ -376,7 +376,7 @@ class GameCanvas extends React.Component {
                     dispatch(actions.propertiesPanelNeedsRefresh(true));
                 } else {
                     // Pan the world.
-                    this.pan();
+                    this.activeState.camera.pan();
                 }
             }
         });
@@ -415,32 +415,6 @@ class GameCanvas extends React.Component {
                 }
             }
         });
-    }
-
-    pan() {
-        // const world = this.activeState.world;
-        const camera = this.activeState.camera;
-        // const view = camera.view;
-
-        const lastX = this.lastMousePos.x;
-        const lastY = this.lastMousePos.y;
-        const currentX = this.mouse.position.x;
-        const currentY = this.mouse.position.y;
-
-        // Get direction of drag
-        let dx = currentX - lastX;
-        let dy = currentY - lastY;
-
-        // Make sure we dont' move outside the bounds of the world
-        const bounds = camera.checkBounds(dx, dy);
-        if (bounds.hitX) { dx = 0; }
-        if (bounds.hitY) { dy = 0; }
-
-        camera.translateView(-dx, -dy);
-
-        // reset last pos for next update
-        this.lastMousePos.x = currentX;
-        this.lastMousePos.y = currentY;
     }
 
     /**
@@ -513,10 +487,12 @@ class GameCanvas extends React.Component {
         const { isPlaying, primativesPanelSelection, selectedObject } = this.props;
 
         // clear the canvas with a transparent fill, to allow the canvas background to show
-        const worldX = this.activeState.world.bounds.min.x;
-        const worldY = this.activeState.world.bounds.min.y;
-        const worldWidth = this.activeState.world.bounds.max.x - worldX;
-        const worldHeight = this.activeState.world.bounds.max.y - worldY;
+        const world = this.activeState.world;
+        const bounds = world.bounds;
+        const worldX = bounds.min.x;
+        const worldY = bounds.min.y;
+        const worldWidth = bounds.max.x - worldX;
+        const worldHeight = bounds.max.y - worldY;
 
         this.ctx.globalCompositeOperation = 'source-in';
         this.ctx.fillStyle = 'transparent';
@@ -531,6 +507,12 @@ class GameCanvas extends React.Component {
             this.activeState.camera.update();
         }
 
+        // Draw world bounds
+        this.ctx.beginPath();
+        this.ctx.strokeStyle = 'black';
+        this.ctx.lineWidth = 10;
+        this.ctx.strokeRect(worldX, worldY, worldWidth, worldHeight);
+        this.ctx.lineWidth = 1;
 
         for (let i = 0; i < this.activeState.bodies.length; i++) {
             this.ctx.beginPath();

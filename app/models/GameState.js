@@ -48,7 +48,6 @@ function GameState(dispatch, canvas) {
     };
 }
 
-
 GameState.prototype.setWorldBounds = function(x, y, width, height) {
     this.world.bounds.min.x = x;
     this.world.bounds.min.y = y;
@@ -139,6 +138,7 @@ GameState.prototype.setInitialProperty = function(body, property, value) {
         const scaleChangeY = targetScaleY / initialScaleY;
         Matter.Body.scale(body, scaleChangeX, scaleChangeY);
     } else {
+        // let v = utils.truncateValue(property, value);
         Matter.Body.set(body, property, value);
     }
     this.updateBodyInitialState(body, property);
@@ -376,6 +376,11 @@ GameState.prototype.resolveBehavior = function(behavior) {
             }
             case 'shoot':
                 break;
+            case 'change world': {
+                this.dispatch(actions.activateGameState(behavior.resolution));
+                this.dispatch(actions.setIsPlaying(true));
+                break;
+            }
             default:
                 console.log('no behavior resolution defined, see GameState.resolveBehavior');
                 break;

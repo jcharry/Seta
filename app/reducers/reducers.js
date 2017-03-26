@@ -11,7 +11,11 @@ export const gameStatesReducer = (state = {}, action) => {
         case 'ACTIVATE_GAME_STATE': {
             const newState = {};
             Object.keys(state).forEach(id => {
-                newState[id] = (action.id === id);
+                let stateToActivate = action.id;
+                if (typeof stateToActivate === 'number') {
+                    stateToActivate = Number(stateToActivate).toString();
+                }
+                newState[id] = (stateToActivate === id);
             });
             return newState;
         }
@@ -169,8 +173,8 @@ export const scoreReducer = (state = 0, action) => {
 export const followBodiesReducer = (state = {}, action) => {
     switch (action.type) {
         case 'CHANGE_FOLLOW_BODY': {
-            let gs = action.gameState;
-            let currFollow = state[gs];
+            const gs = action.gameState;
+            const currFollow = state[gs];
             let follow;
             if (currFollow === action.id) {
                 follow = -1;

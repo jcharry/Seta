@@ -4,6 +4,7 @@
  *
  * Distributed under terms of the MIT license.
  */
+import * as Constants from 'models/Constants';
 export const clone = function(obj) {
     return JSON.parse(JSON.stringify(obj));
 };
@@ -22,3 +23,29 @@ export const getActiveGameState = function(gameStates) {
 
     return -1;
 };
+
+// FIXME: Not flexible enough
+export const truncateValue = function(property, value) {
+    switch (Constants.PropertyMap[property]) {
+        case 'OBJECT': {
+            return Object.keys(value).reduce((acc, curr) => {
+                let v = parseFloat(value[curr], 10);
+                if (Constants.PropertyDecimalTruncations[property]) {
+                    v = Number(v.toFixed(Constants.PropertyDecimalTruncations[property]));
+                }
+                acc[curr] = v;
+                return acc;
+            }, {});
+        }
+        case 'PRIMATIVE': {
+            let v = parseFloat(value, 10);
+            if (Constants.PropertyDecimalTruncations[property]) {
+                return Number(v.toFixed(Constants.PropertyDecimalTruncations[property]));
+            }
+            return v;
+        }
+        case 'BOUNDS':
+            break;
+    }
+    return value;
+}
