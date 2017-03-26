@@ -10,6 +10,8 @@
 - ~~Implement constraint behaviors~~
 - ~~Collision callbacks??~~
 - ~~Fix camera issue when refreshing scene~~
+- Set limits on some controls - i.e. only add force if body is colliding with
+    another body (i.e. on the floor);
 - Camera to maintain it's position on refresh?
 - "Look Inside" feature - (show vectors, forces, eqns of motion?)
 - Debug view - show vectors (accel, pos, vel, forces, torque)

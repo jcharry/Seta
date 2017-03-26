@@ -18,7 +18,9 @@
 }
 
 .panel {
+    // box-sizing: border-box;
     background-color: $panel-color;
+    border: 1px solid rgba(0, 0, 0, 0.3);
 }
 
 .inactive {

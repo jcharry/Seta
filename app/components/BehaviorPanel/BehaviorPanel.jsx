@@ -40,7 +40,8 @@ class BehaviorPanel extends React.Component {
                 obj: '-1',
                 key: 'a',
                 action: 'force up',
-                resolution: '1'
+                resolution: '1',
+                condition: 'anytime'
             }
         };
 
@@ -54,7 +55,9 @@ class BehaviorPanel extends React.Component {
             'force up',
             'force down',
             'force left',
-            'force right'
+            'force right',
+            'torque right',
+            'torque left'
             // 'move up',
             // 'move down',
             // 'move left',
@@ -127,6 +130,15 @@ class BehaviorPanel extends React.Component {
                     control: {
                         ...this.state.control,
                         action: e.target.value
+                    }
+                });
+                break;
+            }
+            case 'new-control-condition': {
+                this.setState({
+                    control: {
+                        ...this.state.control,
+                        condition: e.target.value
                     }
                 });
                 break;
@@ -227,25 +239,25 @@ class BehaviorPanel extends React.Component {
         const { dispatch, selectedObject, gameStates, behaviors } = this.props;
         const resolution = this.state.control.action;
 
-        switch (this.state.control.action) {
-            case 'force right':
-            case 'force left':
-            case 'force up':
-            case 'force down':
-                // resolution = this.state.control
-                break;
-
-            case 'move left':
-            case 'move right':
-            case 'move down':
-            case 'move up':
-                break;
-
-            case 'shoot':
-                break;
-            default:
-                break;
-        }
+        // switch (this.state.control.action) {
+        //     case 'force right':
+        //     case 'force left':
+        //     case 'force up':
+        //     case 'force down':
+        //         // resolution = this.state.control
+        //         break;
+        //
+        //     case 'move left':
+        //     case 'move right':
+        //     case 'move down':
+        //     case 'move up':
+        //         break;
+        //
+        //     case 'shoot':
+        //         break;
+        //     default:
+        //         break;
+        // }
 
         const activeStateId = utils.getActiveGameState(gameStates);
         const activeBehaviors = behaviors[activeStateId];
@@ -254,13 +266,14 @@ class BehaviorPanel extends React.Component {
             selectedObject,
             this.state.control.key,
             this.state.control.action,
-            resolution
+            resolution,
+            this.state.control.condition
         );
 
         const err = this.validateInput(control, activeStateId, activeBehaviors);
 
         if (Object.keys(err).length === 0) {
-            // TODO: Move this into the game state
+            // TODO: Move this into the game state, maybe?
             dispatch(actions.addControlBehavior(activeStateId, control));
         }
     }
@@ -300,16 +313,6 @@ class BehaviorPanel extends React.Component {
         );
 
         const err = this.validateInput(collision, activeStateId, activeBehaviors);
-
-
-        // Don't add duplicates!
-        // activeBehaviors.forEach(behavior => {
-        //     if (collision.id === behavior.id) {
-        //         console.warn('cannot add duplicate behavior');
-        //         err.isDupe = true;
-        //     }
-        // });
-
 
         if (Object.keys(err).length === 0) {
             dispatch(actions.addCollisionBehavior(activeStateId, collision));
@@ -395,7 +398,7 @@ class BehaviorPanel extends React.Component {
                         <ol className='behavior-list'>
                             {controlBehaviors.map(behavior =>
                                 <li className='behavior-item' key={behavior.id}>
-                                    <div>When <span className='highlight'>key {behavior.key}</span> is pressed, this body will <span className='highlight'>{behavior.action}</span></div>
+                                    <div>When <span className='highlight'>key {behavior.key}</span> is pressed, this body will <span className='highlight'>{behavior.action}</span> only when <span className='highlight'>{behavior.condition}</span></div>
                                     <img alt='delete behavior' src={deleteImg} onClick={() => { this.handleDeleteBehavior(behavior.gameState, behavior.id); }} />
                                 </li>
                             )}
@@ -476,6 +479,12 @@ class BehaviorPanel extends React.Component {
                         <select value={this.state.control.action} onChange={this.handleChange} name='new-control-action'>
                             {this.controlActions.map(actionType => <option key={actionType}>{actionType}</option>)}
                         </select>
+                        <p>only when</p>
+                        <select value={this.state.control.condition} onChange={this.handleChange} name='new-control-condition'>
+                            <option value='anytime'>Anytime</option>
+                            <option value='colliding'>Body is colliding</option>
+                        </select>
+
                         <button onClick={this.handleAddControl}>Add</button>
                     </div>
                     {renderControlBehaviors()}

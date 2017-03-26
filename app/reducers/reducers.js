@@ -66,6 +66,8 @@ export const primativesPanelSelectionReducer = (state = '', action) => {
     switch (action.type) {
         case 'SET_PRIMATIVES_PANEL_SELECTION':
             return action.id;
+        case 'CLEAR_PRIMATIVES_PANEL_SELECTION':
+            return '';
         default:
             return state;
     }

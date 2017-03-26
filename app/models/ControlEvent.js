@@ -1,4 +1,4 @@
-function ControlEvent(stateId, bodyId, key, action, resolution) {
+function ControlEvent(stateId, bodyId, key, action, resolution, condition) {
     this.gameState = stateId;
     this.body = bodyId;
     this.key = key;
@@ -6,6 +6,7 @@ function ControlEvent(stateId, bodyId, key, action, resolution) {
     this.resolution = resolution;
     this.id = `b${bodyId}-k${key}-a${action}-s${stateId}`;
     this.type = 'control';
+    this.condition = condition;
 }
 
 export default ControlEvent;

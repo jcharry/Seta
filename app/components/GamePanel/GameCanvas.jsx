@@ -68,19 +68,19 @@ class GameCanvas extends React.Component {
             this.activeState = new GameState(dispatch, this.canvas);
             this.gameStates[this.activeState.id] = this.activeState;
             this.activeState.camera.mouse = this.mouse;
-            this.activeState.world.bounds.min.x = -300;
-            this.activeState.world.bounds.min.y = -300;
-            this.activeState.world.bounds.max.x = width + 300;
-            this.activeState.world.bounds.max.y = height + 300;
+            this.activeState.world.bounds.min.x = 0;
+            this.activeState.world.bounds.min.y = 0;
+            this.activeState.world.bounds.max.x = width;
+            this.activeState.world.bounds.max.y = height;
             dispatch(actions.addGameState(this.activeState.id));
 
             // XXX: Remember to remove this!
             // Just for testing
             // window.globalBodies = this.bodies;
-            window.as = this.activeState;
 
             // Canvas Mouse Event Listeners
             this.initializeEventListeners();
+            this.initializeKeyboardEvents();
             // this.initializeMatterCollisionEvents();
 
             // create two boxes and a ground
@@ -97,7 +97,6 @@ class GameCanvas extends React.Component {
                 this.activeState.addBodies([boxA, boxB, ground], this.props.isPlaying);
             }
 
-
             // Kick off the animation
             this.renderCanvas();
         }, 100);
@@ -112,20 +111,20 @@ class GameCanvas extends React.Component {
             primativesPanelSelection,
             gameObjects,
             behaviors,
-            isPlaying,
+            // isPlaying,
             followBodies
         } = this.props;
 
         // Check for isPlaying
         // Add keypress handlers
-        if (!_.isEqual(prevProps.isPlaying, isPlaying)) {
-            // Changed and is now playing
-            if (isPlaying === true) {
-                this.initializeKeyboardEvents();
-            } else {
-                this.clearKeyboardEvents();
-            }
-        }
+        // if (!_.isEqual(prevProps.isPlaying, isPlaying)) {
+        //     // Changed and is now playing
+        //     if (isPlaying === true) {
+        //         this.initializeKeyboardEvents();
+        //     } else {
+        //         this.clearKeyboardEvents();
+        //     }
+        // }
 
         // Listen for changes in behaviors
         if (!_.isEqual(prevProps.behaviors, behaviors)) {
@@ -263,10 +262,17 @@ class GameCanvas extends React.Component {
     }
 
     initializeKeyboardEvents() {
+        console.log('initializing keyboard events');
         // const { isPlaying } = this.props;
+        const { dispatch } = this.props;
         // Use this method to ensure we only have one keypress listener, ever
-        document.onkeypress = e => {
+        document.onkeydown = e => {
             console.log(e);
+            if (e.key === 'Escape') {
+                dispatch(actions.clearSelectedObject());
+                dispatch(actions.clearPrimativesPanelSelection());
+                return;
+            }
             // Look through active behaviors, find check if any keypresses
             // match
             this.activeState.behaviors.forEach(behavior => {

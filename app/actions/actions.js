@@ -58,6 +58,10 @@ export const setPrimativesPanelSelection = id => ({
     id
 });
 
+export const clearPrimativesPanelSelection = () => ({
+    type: 'CLEAR_PRIMATIVES_PANEL_SELECTION'
+});
+
 export const needsRestart = shouldRestart => ({
     type: 'NEEDS_RESTART',
     shouldRestart
@@ -120,7 +124,7 @@ export const changeFollowBody = (gameState, id) => ({
     gameState,
     id
 });
-export const clearFollowBody = (gameState) => ({
+export const clearFollowBody = gameState => ({
     type: 'CLEAR_FOLLOW_BODY',
     gameState
 });

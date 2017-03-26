@@ -308,83 +308,120 @@ GameState.prototype.removeBehavior = function(behavior) {
     this.behaviors = this.behaviors.filter(b => b.id !== behavior);
 };
 
+GameState.prototype.isBodyColliding = function(body) {
+    let isColliding = false;
+    // Look through all collision pairs
+    this.engine.pairs.collisionActive.forEach(pair => {
+        if (body.id === pair.bodyA.id || body.id === pair.bodyB.id) {
+            isColliding = true;
+        }
+    });
+    return isColliding;
+}
+
 GameState.prototype.resolveBehavior = function(behavior) {
     const bodyId = behavior.body;
     const body = this.bodies.filter(b => b.id === bodyId)[0];
 
     if (body) {
-        switch (behavior.action) {
-            case 'score': {
-                console.log('score fired');
-                this.dispatch(actions.addScore(parseInt(behavior.resolution, 10)));
-                break;
-            }
-            case 'destroy': {
-                console.log('destroy fired');
-                this.removeGameObject('body', behavior.resolution, true);
-                break;
-            }
-            case 'force up':
-            case 'force down': {
-                const dir = behavior.action.substr(6);
-                let yForce = 0;
-                if (dir === 'up') {
-                    yForce = -0.1;
-                } else if (dir === 'down') {
-                    yForce = 0.1;
-                }
+        switch (behavior.type) {
+            case 'control':
+                if (behavior.condition === 'colliding') {
+                    console.log(behavior.condition);
 
-                Matter.Body.applyForce(body, body.position, { x: 0, y: yForce });
-                break;
-            }
-            case 'force left':
-            case 'force right': {
-                const dir = behavior.action.substr(6);
-                let xForce = 0;
-                if (dir === 'left') {
-                    xForce = -0.1;
-                } else if (dir === 'right') {
-                    xForce = 0.1;
+                    // Return early and don't fire collision unless the body is
+                    // actively colliding with something.
+                    if (!this.isBodyColliding(body)) return;
                 }
-                Matter.Body.applyForce(body, body.position, { x: xForce, y: 0 });
-                break;
-            }
-            case 'move left':
-            case 'move right': {
-                const dir = behavior.action.substr(5);
-                let xChange = 0;
-                if (dir === 'left') {
-                    xChange = -5;
-                } else if (dir === 'right') {
-                    xChange = 5;
+                switch (behavior.action) {
+                    case 'force up':
+                    case 'force down': {
+                        const dir = behavior.action.substr(6);
+                        let yForce = 0;
+                        if (dir === 'up') {
+                            yForce = -0.1;
+                        } else if (dir === 'down') {
+                            yForce = 0.1;
+                        }
+
+                        Matter.Body.applyForce(body, body.position, { x: 0, y: yForce });
+                        break;
+                    }
+                    case 'force left':
+                    case 'force right': {
+                        const dir = behavior.action.substr(6);
+                        let xForce = 0;
+                        if (dir === 'left') {
+                            xForce = -0.1;
+                        } else if (dir === 'right') {
+                            xForce = 0.1;
+                        }
+                        Matter.Body.applyForce(body, body.position, { x: xForce, y: 0 });
+                        break;
+                    }
+                    case 'torque right':
+                        Matter.Body.set(body, 'torque', 1);
+                        break;
+                    case 'torque left': {
+                        Matter.Body.set(body, 'torque', -1);
+                        break;
+                    }
+                    case 'move left':
+                    case 'move right': {
+                        const dir = behavior.action.substr(5);
+                        let xChange = 0;
+                        if (dir === 'left') {
+                            xChange = -5;
+                        } else if (dir === 'right') {
+                            xChange = 5;
+                        }
+                        Matter.Body.setPosition(body, { x: body.position.x + xChange, y: body.position.y });
+                        break;
+                    }
+                    case 'move up':
+                    case 'move down': {
+                        // Get direction
+                        const dir = behavior.action.substr(5);
+                        let yChange = 0;
+                        if (dir === 'up') {
+                            yChange = -5;
+                        } else if (dir === 'down') {
+                            yChange = 5;
+                        }
+                        Matter.Body.setPosition(body, { x: body.position.x, y: body.position.y + yChange });
+                        break;
+                    }
+                    case 'shoot':
+                        break;
                 }
-                Matter.Body.setPosition(body, { x: body.position.x + xChange, y: body.position.y });
                 break;
-            }
-            case 'move up':
-            case 'move down': {
-                // Get direction
-                const dir = behavior.action.substr(5);
-                let yChange = 0;
-                if (dir === 'up') {
-                    yChange = -5;
-                } else if (dir === 'down') {
-                    yChange = 5;
+
+
+            case 'collision':
+                switch (behavior.action) {
+                    case 'change world': {
+                        this.dispatch(actions.activateGameState(behavior.resolution));
+                        this.dispatch(actions.setIsPlaying(true));
+                        break;
+                    }
+                    case 'score': {
+                        console.log('score fired');
+                        this.dispatch(actions.addScore(parseInt(behavior.resolution, 10)));
+                        break;
+                    }
+                    case 'destroy': {
+                        console.log('destroy fired');
+                        this.removeGameObject('body', behavior.resolution, true);
+                        break;
+                    }
                 }
-                Matter.Body.setPosition(body, { x: body.position.x, y: body.position.y + yChange });
-                break;
-            }
-            case 'shoot':
-                break;
-            case 'change world': {
-                this.dispatch(actions.activateGameState(behavior.resolution));
-                this.dispatch(actions.setIsPlaying(true));
-                break;
-            }
-            default:
-                console.log('no behavior resolution defined, see GameState.resolveBehavior');
                 break;
         }
+        // switch (behavior.action) {
+        //     default:
+        //         console.log('no behavior resolution defined, see GameState.resolveBehavior');
+        //         break;
+        // }
     }
 };
 
