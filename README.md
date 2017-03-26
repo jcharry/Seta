@@ -1,7 +1,26 @@
 #IN PROGRESS#
 
 ##TODO##
-- Set world bounds
+- ~~Drag bodies around during creation stage~~
+- ~~Scale / Resize bodies?~~ Should I use handlebars?  A slider?
+- ~~Move world around on drag~~
+- ~~Set world parameters - air friction, gravity, size, bounds?~~
+- ~~Set world bounds~~
 - Polygon implementation?  Draw your own, or just specify number of sides?
-- Fix camera issue when refreshing scene - ideally I'd liek the camera to
-    maintain it's position, rather than snapping back to (0, 0)
+- ~~Implement constraint behaviors~~
+- ~~Collision callbacks??~~
+- ~~Fix camera issue when refreshing scene~~
+- Camera to maintain it's position on refresh?
+- "Look Inside" feature - (show vectors, forces, eqns of motion?)
+- Debug view - show vectors (accel, pos, vel, forces, torque)
+- Implement sensors for collision events
+- Let collisions remove contraints as well as destroy bodies
+- User settable styles
+- Handlebars for object resizing
+- CTRL-Z for undo
+- ESC to deselect objects
+- Drag To Highlight multiple bodies
+- Batch Edit
+- Limit values of certain properties to prevent exploding simulations
+- Transition to a new world, add some delay so it's not instantaneous
+
