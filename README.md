@@ -20,7 +20,7 @@
 - User settable styles
 - Handlebars for object resizing
 - CTRL-Z for undo
-- ESC to deselect objects
+- ~~ESC to deselect objects~~
 - Drag To Highlight multiple bodies
 - Batch Edit
 - Limit values of certain properties to prevent exploding simulations
