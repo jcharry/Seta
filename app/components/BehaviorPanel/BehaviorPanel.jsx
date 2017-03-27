@@ -57,7 +57,11 @@ class BehaviorPanel extends React.Component {
             'force left',
             'force right',
             'torque right',
-            'torque left'
+            'torque left',
+            'velocity up',
+            'velocity down',
+            'velocity left',
+            'velocity right'
             // 'move up',
             // 'move down',
             // 'move left',

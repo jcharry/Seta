@@ -319,6 +319,7 @@ GameState.prototype.isBodyColliding = function(body) {
     return isColliding;
 }
 
+// TODO: Move resolution into Behavior Objects
 GameState.prototype.resolveBehavior = function(behavior) {
     const bodyId = behavior.body;
     const body = this.bodies.filter(b => b.id === bodyId)[0];
@@ -339,9 +340,9 @@ GameState.prototype.resolveBehavior = function(behavior) {
                         const dir = behavior.action.substr(6);
                         let yForce = 0;
                         if (dir === 'up') {
-                            yForce = -0.1;
+                            yForce = -0.01;
                         } else if (dir === 'down') {
-                            yForce = 0.1;
+                            yForce = 0.01;
                         }
 
                         Matter.Body.applyForce(body, body.position, { x: 0, y: yForce });
@@ -352,9 +353,9 @@ GameState.prototype.resolveBehavior = function(behavior) {
                         const dir = behavior.action.substr(6);
                         let xForce = 0;
                         if (dir === 'left') {
-                            xForce = -0.1;
+                            xForce = -0.01;
                         } else if (dir === 'right') {
-                            xForce = 0.1;
+                            xForce = 0.01;
                         }
                         Matter.Body.applyForce(body, body.position, { x: xForce, y: 0 });
                         break;
@@ -364,6 +365,19 @@ GameState.prototype.resolveBehavior = function(behavior) {
                         break;
                     case 'torque left': {
                         Matter.Body.set(body, 'torque', -1);
+                        break;
+                    }
+                    case 'velocity up':
+                        Matter.Body.set(body, 'velocity', {x: body.velocity.x, y: -5});
+                        break;
+                    case 'velocity down':
+                        Matter.Body.set(body, 'velocity', {x: body.velocity.x, y: 5});
+                        break;
+                    case 'velocity left':
+                        Matter.Body.set(body, 'velocity', {x: -5, y: body.velocity.y});
+                        break;
+                    case 'velocity right': {
+                        Matter.Body.set(body, 'velocity', {x: 5, y: body.velocity.y});
                         break;
                     }
                     case 'move left':

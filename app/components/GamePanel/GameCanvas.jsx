@@ -34,6 +34,7 @@ class GameCanvas extends React.Component {
         this.refresh = this.refresh.bind(this);
         this.cleanupScene = this.cleanupScene.bind(this);
         this.canvasOffset = { x: 0, y: 0 };
+        this.keyMap = {};
 
         // XXX: FOR DEBUG purposes only, don't forget to remove
         window.seta = this;
@@ -82,12 +83,14 @@ class GameCanvas extends React.Component {
             this.initializeEventListeners();
             this.initializeKeyboardEvents();
             // this.initializeMatterCollisionEvents();
+            const ground = this.activeState.bodyFactory('Rectangle', { x: 400, y: 610, width: 5000, height: 60, isFixed: true });
+            this.activeState.addBody(ground);
 
             // create two boxes and a ground
             if (window._DEBUG) {
                 const boxA = this.activeState.bodyFactory('Rectangle', { x: 400, y: 200, width: 80, height: 80 });
                 const boxB = this.activeState.bodyFactory('Rectangle', { x: 450, y: 50, width: 80, height: 80 });
-                const ground = this.activeState.bodyFactory('Rectangle', { x: 400, y: 610, width: 5000, height: 60, isFixed: true });
+                // const ground = this.activeState.bodyFactory('Rectangle', { x: 400, y: 610, width: 5000, height: 60, isFixed: true });
                 this.activeState.camera.follow = boxA;
                 this.activeState.behaviors.push(new ControlEvent(this.activeState.id, boxA.id, 'a', 'force left'));
                 this.activeState.behaviors.push(new ControlEvent(this.activeState.id, boxA.id, 'd', 'force right'));
@@ -266,23 +269,29 @@ class GameCanvas extends React.Component {
         // const { isPlaying } = this.props;
         const { dispatch } = this.props;
         // Use this method to ensure we only have one keypress listener, ever
+        document.onkeyup = e => {
+            this.keyMap[e.key] = false;
+        };
         document.onkeydown = e => {
-            console.log(e);
             if (e.key === 'Escape') {
                 dispatch(actions.clearSelectedObject());
                 dispatch(actions.clearPrimativesPanelSelection());
                 return;
             }
-            // Look through active behaviors, find check if any keypresses
+
+            // toggle key in keymap
+            this.keyMap[e.key] = true;
+
+            // Look through active behaviors, check if any keypresses
             // match
-            this.activeState.behaviors.forEach(behavior => {
-                if (behavior.type === 'control') {
-                    if (behavior.key === e.key) {
-                        console.log('resolving ', behavior.key, 'keypress');
-                        this.activeState.resolveBehavior(behavior);
-                    }
-                }
-            });
+            // this.activeState.behaviors.forEach(behavior => {
+            //     if (behavior.type === 'control') {
+            //         if (keyMap[behavior.key]) {
+            //             console.log('resolving ', behavior.key, 'keypress');
+            //             this.activeState.resolveBehavior(behavior);
+            //         }
+            //     }
+            // });
         };
     }
 
@@ -429,6 +438,15 @@ class GameCanvas extends React.Component {
      * @param {number} timeStep - usually set to 16.666
     */
     updateEngine(timeStep) {
+        // Resolve keypresses
+        this.activeState.behaviors.forEach(behavior => {
+            if (behavior.type === 'control') {
+                if (this.keyMap[behavior.key]) {
+                    console.log('resolving ', behavior.key, 'keypress');
+                    this.activeState.resolveBehavior(behavior);
+                }
+            }
+        });
         Matter.Engine.update(this.activeState.engine, timeStep);
     }
 
