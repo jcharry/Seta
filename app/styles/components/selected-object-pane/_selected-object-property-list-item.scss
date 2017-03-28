@@ -4,13 +4,13 @@
     justify-content: space-between;
 
     .left {
-        flex: 1 1 50%
+        // flex: 1 1 50%
     }
 
     .right {
         display: flex;
         flex-direction: column;
-        flex: 1 1 50%;
+        // flex: 1 1 50%;
     }
 
     input, label {
@@ -21,7 +21,7 @@
         margin: 0;
     }
     input {
-        max-width: 75px;
+        max-width: 50px;
         outline: none;
         border: none;
         border-bottom: 1px solid black;
