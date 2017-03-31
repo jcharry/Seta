@@ -19,12 +19,11 @@
         font-family: 'Barrio', cursive;
         color: orange;
     }
-    .menu-left h1:hover {
-        opacity: 0.7;
-        cursor: default;
-    }
-    .menu-left p:hover {
-        opacity: 0.7;
+    // .menu-left h1:hover {
+    //     opacity: 0.7;
+    //     cursor: default;
+    // }
+    .menu-left p {
         cursor: pointer;
     }
 
@@ -36,5 +35,21 @@
     .menu-panel-button {
         background-color: transparent;
         border: none;
+    }
+
+    .fixed-panel {
+        h2 {
+            margin-bottom: 0;
+        }
+        ol {
+            margin-top: 0;
+        }
+        h3 {
+            color: $panel-color;
+        }
+        h3, p {
+            padding: 0;
+            margin: 0;
+        }
     }
 }

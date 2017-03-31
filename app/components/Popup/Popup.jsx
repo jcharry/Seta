@@ -66,7 +66,6 @@ class Popup extends React.Component {
                 break;
             case 'edittext':
                 dispatch(actions.setPopupPanelContent('properties:text'))
-                // FIXME: Handle this case....
                 break;
             default:
                 break;
@@ -118,11 +117,13 @@ Popup.propTypes = {
     bounds: React.PropTypes.object,
     selectedObject: React.PropTypes.number.isRequired,
     gameObjects: React.PropTypes.object.isRequired,
+    propertiesPanelNeedsRefresh: React.PropTypes.bool.isRequired,
     dispatch: React.PropTypes.func.isRequired
 };
 
 export default connect(state => ({
     isPlaying: state.isPlaying,
     selectedObject: state.selectedObject,
-    gameObjects: state.gameObjects
+    gameObjects: state.gameObjects,
+    propertiesPanelNeedsRefresh: state.propertiesPanelNeedsRefresh
 }))(Popup);

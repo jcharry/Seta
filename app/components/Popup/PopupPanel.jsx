@@ -5,14 +5,14 @@
  * Distributed under terms of the MIT license.
  */
 import React from 'react';
-import closeImg from 'images/Close-Filled-48.png';
+import CloseButton from 'components/CloseButton';
 
 class PopupPanel extends React.Component {
     render() {
         const { handleClose } = this.props;
         return (
             <div className='popup-panel'>
-                <img className='close-btn' onClick={handleClose} src={closeImg} alt='close button' />
+                <CloseButton onClick={handleClose} />
                 {this.props.children}
             </div>
         );

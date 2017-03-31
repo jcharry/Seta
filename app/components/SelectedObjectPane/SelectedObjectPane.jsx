@@ -373,7 +373,6 @@ class SelectedObjectPane extends React.Component {
         return (
             <div className='selected-object-pane'>
                 <h2>Physical Properties</h2>
-                <p>Object ID: {selectedObj.id}</p>
                 <ul className='selected-object-property-list'>
                     {renderProperties()}
                 </ul>

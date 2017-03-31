@@ -16,8 +16,9 @@ class PrimativesListItem extends React.Component {
         }
         return (
             <div onClick={() => { clickHandler(title); }} className={clsName}>
-                <img src={image} alt={title} />
-                <p>{title}</p>
+                {this.props.children}
+                {/* <img src={image} alt={title} /> */}
+                {/* <p>{title}</p> */}
             </div>
         );
     }

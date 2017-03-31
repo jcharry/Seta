@@ -3,4 +3,19 @@
 .primatives-panel{
     flex: 1 0 15%;
     overflow-y: auto;
+
+    .tooltip-content {
+        display: flex;
+
+        .column {
+            display: flex;
+            flex-direction: column;
+            padding: 1rem;
+        }
+
+        img {
+            width: 300px !important;
+            height: auto !important;
+        }
+    }
 }

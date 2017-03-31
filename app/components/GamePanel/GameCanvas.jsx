@@ -693,6 +693,7 @@ class GameCanvas extends React.Component {
                     style.userSelect = 'none';
                     return (<Draggable
                         onStart={this.handleTextDragStart}
+                        onDrag={(e) => { this.updateTextObjectPosition(e, txtObj) }}
                         onStop={(e) => { this.updateTextObjectPosition(e, txtObj) }}
                         position={{x: txtObj.x, y: txtObj.y}}
                         bounds='#game-canvas'

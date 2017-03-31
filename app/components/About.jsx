@@ -20,6 +20,11 @@ class About extends React.Component {
                     <a href="https://icons8.com/web-app/11705/Delete">Delete icon credits</a>
                     <a href="https://icons8.com/web-app/19718/Close-Window">Close window icon credits</a>
                     <a href="https://icons8.com/web-app/37839/Add-Filled">Add filled icon credits</a>
+                    <a href="https://icons8.com/web-app/2362/Sensor">Sensor icon credits</a>
+                    <a href="https://icons8.com/web-app/982/Generic-Text">Generic text icon credits</a>
+                    <a href="https://icons8.com/web-app/20407/Mechanical-Spring">Mechanical spring icon credits</a>
+                    <a href="https://icons8.com/web-app/646/Help">Help icon credits</a>
+
 
                 </ul>
             </div>
