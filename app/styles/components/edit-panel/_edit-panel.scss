@@ -1,0 +1,17 @@
+.edit-panel {
+    display: flex;
+    margin: 0;
+    padding: 0;
+
+    h2 {
+        margin: 0;
+        padding: 0;
+        margin-right: 1rem;
+    }
+    input {
+        border: none;
+        background-color: $panel-color-alternate;
+        outline: none;
+        border-bottom: 1px solid black;
+    }
+}

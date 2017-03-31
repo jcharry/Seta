@@ -151,6 +151,16 @@ export const stylePanelOpenReducer = (state = false, action) => {
             return state;
     }
 };
+
+export const popupPanelContentReducer = (state = '', action) => {
+    switch (action.type) {
+        case 'SET_POPUP_PANEL_CONTENT':
+            return action.id;
+        default:
+            return state;
+    }
+};
+
 export const behaviorPanelOpenReducer = (state = false, action) => {
     switch (action.type) {
         case 'TOGGLE_BEHAVIOR_PANEL':

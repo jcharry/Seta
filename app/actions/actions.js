@@ -91,6 +91,11 @@ export const propertiesPanelNeedsRefresh = needsRefresh => ({
     needsRefresh
 });
 
+export const setPopupPanelContent = id => ({
+    type: 'SET_POPUP_PANEL_CONTENT',
+    id
+});
+
 export const closeStylePanel = () => ({
     type: 'CLOSE_STYLE_PANEL'
 });

@@ -26,3 +26,10 @@
 - Limit values of certain properties to prevent exploding simulations
 - Transition to a new world, add some delay so it's not instantaneous
 
+## LEFT OFF ##
+- 3/30: Need to finish implementing text edit
+- Ideally, combine Behavior Panel, Style Panel, and Edit Text Panel all into
+    one.  Shoudl be simple.  Just make a container that shows somethign based
+    on whatever is toggled in the redux store
+
+

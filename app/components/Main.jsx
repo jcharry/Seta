@@ -10,8 +10,6 @@ import MenuPanel from 'components/MenuPanel/MenuPanel';
 import GamePanel from 'components/GamePanel/GamePanel';
 import PrimativesPanel from 'components/PrimativesPanel/PrimativesPanel';
 import PropertiesPanel from 'components/PropertiesPanel/PropertiesPanel';
-import BehaviorPanel from 'components/BehaviorPanel/BehaviorPanel';
-import StylePanel from 'components/StylePanel/StylePanel';
 
 class Main extends React.Component {
     render() {
@@ -26,8 +24,6 @@ class Main extends React.Component {
                     <GamePanel />
                     <PropertiesPanel />
                 </div>
-                {behaviorPanelOpen && <BehaviorPanel />}
-                {stylePanelOpen && <StylePanel />}
             </div>
         );
     }
@@ -41,5 +37,5 @@ Main.propTypes = {
 
 export default connect(state => ({
     behaviorPanelOpen: state.behaviorPanelOpen,
-    stylePanelOpen: state.stylePanelOpen
+    stylePanelOpen: state.stylePanelOpen,
 }))(Main);

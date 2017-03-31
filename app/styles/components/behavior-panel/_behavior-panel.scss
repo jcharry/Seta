@@ -1,10 +1,10 @@
 .interaction-panel {
-    position: fixed;
-    top: 160px;
-    right: 200px;
-    width: 600px;
-    background-color: orange;
-    padding: 1rem;
+    // position: fixed;
+    // top: 160px;
+    // right: 200px;
+    // width: 600px;
+    // background-color: orange;
+    // padding: 1rem;
 
     flex-direction: column;
 
@@ -32,18 +32,12 @@
         }
     }
 
-    &.visible {
-        display: flex;
-    }
-    &.hidden {
-        display: none;
-    }
-
-    .close-btn {
-        position: absolute;
-        top: 0;
-        right: 0;
-    }
+    // &.visible {
+    //     display: flex;
+    // }
+    // &.hidden {
+    //     display: none;
+    // }
 
     .new {
         display: flex;

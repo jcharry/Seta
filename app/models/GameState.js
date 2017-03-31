@@ -346,7 +346,30 @@ GameState.prototype.resolveBehavior = function(behavior) {
     const bodyId = behavior.body;
     const body = this.bodies.filter(b => b.id === bodyId)[0];
 
+    // It's possible that the body is destroyed, but we still try to resolve
+    // a behavior.  Why!?
     switch (behavior.type) {
+        case 'collision':
+            switch (behavior.action) {
+                case 'change world': {
+                    this.dispatch(actions.activateGameState(behavior.resolution));
+                    this.dispatch(actions.setIsPlaying(true));
+                    break;
+                }
+                case 'score': {
+                    console.log('score fired');
+                    this.dispatch(actions.addScore(parseInt(behavior.resolution, 10)));
+                    break;
+                }
+                case 'destroy': {
+                    console.log('destroy fired');
+                    this.removeGameObject('body', behavior.resolution, true);
+                    break;
+                }
+                default:
+                    break;
+            }
+            break;
         case 'control':
             if (behavior.condition === 'colliding') {
                 console.log(behavior.condition);
@@ -355,6 +378,11 @@ GameState.prototype.resolveBehavior = function(behavior) {
                 // actively colliding with something.
                 if (!this.isBodyColliding(body)) { return; }
             }
+
+            // the body could possibly be destroyed but this collision behavior
+            // wants to fire, so need to deal with that case...
+            if (!body) return;
+
             switch (behavior.action) {
                 case 'force up':
                 case 'force down': {
@@ -434,27 +462,6 @@ GameState.prototype.resolveBehavior = function(behavior) {
             break;
 
 
-        case 'collision':
-            switch (behavior.action) {
-                case 'change world': {
-                    this.dispatch(actions.activateGameState(behavior.resolution));
-                    this.dispatch(actions.setIsPlaying(true));
-                    break;
-                }
-                case 'score': {
-                    console.log('score fired');
-                    this.dispatch(actions.addScore(parseInt(behavior.resolution, 10)));
-                    break;
-                }
-                case 'destroy': {
-                    console.log('destroy fired');
-                    this.removeGameObject('body', behavior.resolution, true);
-                    break;
-                }
-                default:
-                    break;
-            }
-            break;
         default:
             break;
     }

@@ -1,11 +1,11 @@
 .style-panel {
-    position: fixed;
-    top: 160px;
-    right: 200px;
-    width: 600px;
-    background-color: $panel-color-alternate;
+    // position: fixed;
+    // top: 160px;
+    // right: 200px;
+    // width: 600px;
+    // background-color: $panel-color-alternate;
 
-    padding: 1rem;
+    // padding: 1rem;
 
     p {
         padding: 0;
@@ -22,11 +22,11 @@
         margin: 0;
     }
 
-    .close-btn {
-        position: absolute;
-        top: 0;
-        right: 0;
-    }
+    // .close-btn {
+    //     position: absolute;
+    //     top: 0;
+    //     right: 0;
+    // }
 
     input {
         background-color: $panel-color-alternate;

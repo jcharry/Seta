@@ -1,0 +1,14 @@
+.popup-panel {
+    position: fixed;
+    top: 160px;
+    right: 200px;
+    width: 600px;
+    background-color: $panel-color-alternate;
+    padding: 1rem;
+
+    .close-btn {
+        position: absolute;
+        top: 0;
+        right: 0;
+    }
+}

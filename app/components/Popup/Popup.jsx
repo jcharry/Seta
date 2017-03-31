@@ -56,17 +56,17 @@ class Popup extends React.Component {
         const { dispatch } = this.props;
         switch (e.target.name) {
             case 'properties':
-                dispatch(actions.openStylePanel());
-                dispatch(actions.closeBehaviorPanel());
+                dispatch(actions.setPopupPanelContent('properties:object'));
+                {/* dispatch(actions.closeBehaviorPanel()); */}
                 break;
             case 'controls':
             case 'collisions':
-                dispatch(actions.openBehaviorPanel());
-                dispatch(actions.closeStylePanel());
+                dispatch(actions.setPopupPanelContent('behaviors'));
+                {/* dispatch(actions.closeStylePanel()); */}
                 break;
             case 'edittext':
+                dispatch(actions.setPopupPanelContent('properties:text'))
                 // FIXME: Handle this case....
-                debugger;
                 break;
             default:
                 break;

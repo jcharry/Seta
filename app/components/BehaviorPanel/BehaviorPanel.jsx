@@ -301,11 +301,6 @@ class BehaviorPanel extends React.Component {
         const activeStateId = utils.getActiveGameState(gameStates);
 
         const clsName = 'interaction-panel visible';
-        // if (behaviorPanelOpen && selectedObject !== -1) {
-        // clsName += ' visible';
-        // } else {
-        //     clsName += ' hidden';
-        // }
 
         const renderCollisionInputs = () => {
             switch (collision.action) {
@@ -434,7 +429,6 @@ class BehaviorPanel extends React.Component {
 
         return (
             <div className={clsName}>
-                <img className='close-btn' onClick={this.handleClose} src={closeImg} alt='close button' />
                 {/* <div className='follow'> */}
                 {/*     <h2>Set Camera to Follow</h2> */}
                 {/*     <input type='checkbox' checked={this.state.follow} onChange={this.handleChange} name='follow' /> */}
@@ -501,7 +495,6 @@ class BehaviorPanel extends React.Component {
 BehaviorPanel.propTypes = {
     selectedObject: React.PropTypes.number.isRequired,
     dispatch: React.PropTypes.func.isRequired,
-    // behaviorPanelOpen: React.PropTypes.bool.isRequired,
     gameObjects: React.PropTypes.object.isRequired,
     behaviors: React.PropTypes.object.isRequired,
     gameStates: React.PropTypes.object.isRequired,
@@ -510,7 +503,6 @@ BehaviorPanel.propTypes = {
 
 export default connect(state => ({
     selectedObject: state.selectedObject,
-    behaviorPanelOpen: state.behaviorPanelOpen,
     gameObjects: state.gameObjects,
     gameStates: state.gameStates,
     behaviors: state.behaviors,

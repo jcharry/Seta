@@ -3,7 +3,6 @@
  * of the Behavior Panel
  */
 import React from 'react';
-import closeImg from 'images/Close-Filled-48.png';
 import { connect } from 'react-redux';
 import ColorPicker from 'rc-color-picker';
 import 'rc-color-picker/assets/index.css';
@@ -25,19 +24,13 @@ class StylePanel extends React.Component {
             follow: followBodies[activeStateId] === body.id
         }
 
-        this.handleClose = this.handleClose.bind(this);
         this.setColor = this.setColor.bind(this);
         this.handleChange = this.handleChange.bind(this);
         this.handleFollowBodyChange = this.handleFollowBodyChange.bind(this);
     }
 
-    handleClose() {
-        const { dispatch } = this.props;
-        dispatch(actions.closeStylePanel());
-    }
-
     handleChange(e) {
-        const { selectedObject, gameObjects } = this.props;
+        const { selectedObject, gameObjects, dispatch } = this.props;
         const body = gameObjects[selectedObject];
 
         switch (e.target.name) {
@@ -82,7 +75,6 @@ class StylePanel extends React.Component {
     render() {
         return (
             <div className='style-panel'>
-                <img className='close-btn' onClick={this.handleClose} src={closeImg} alt='close button' />
                 <h2>Properties</h2>
                 <div>
                     <h2>Name</h2>
