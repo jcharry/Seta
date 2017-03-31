@@ -1,0 +1,33 @@
+.popup {
+    position: absolute;
+    top: 100;
+    left: 100;
+    border-radius: 10px;
+    background-color: $panel-color-alternate;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    &.visible {
+        visibility: visible;
+    }
+
+    &.hidden {
+        visibility: hidden;
+    }
+    
+
+    button {
+        padding: 0.5rem;
+        background-color: $panel-color-alternate;
+        font-size: 1rem;
+        border: 1px solid white;
+    }
+
+    button:first-child {
+        border-radius: 10px 0px 0px 10px;
+    }
+    button:last-child {
+        border-radius: 0 10px 10px 0px;
+    }
+}

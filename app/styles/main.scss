@@ -18,8 +18,12 @@
 
 // Interaction Panel (where we set collisions, etc)
 @import 'components/behavior-panel/behavior-panel';
+@import 'components/style-panel/style-panel';
 
 @import 'components/score';
+
+@import 'components/popup/popup';
+@import 'components/draggable';
 
 @import url('https://fonts.googleapis.com/css?family=Bahiana|Barrio|Caveat+Brush|Josefin+Sans');
 

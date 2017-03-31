@@ -43,6 +43,24 @@ export const gameObjectsReducer = (state = {}, action) => {
                 return acc;
             }, {});
         }
+        case 'UPDATE_GAME_OBJECT': {
+            let newState = Object.keys(state).reduce((acc, curr) => {
+                acc[curr] = state[curr];
+
+                // Find object that matches passed in id
+                if (parseInt(curr, 10) === action.id) {
+                    Object.keys(action.properties).forEach(key => {
+                        let p = action.properties[key];
+                        if (p && acc[curr][key]) {
+                            acc[curr][key] = action.properties[key];
+                        }
+                    });
+                }
+                return acc;
+            }, {});
+            console.log(newState);
+            return newState;
+        }
         case 'CLEAR_BODIES': {
             return {};
         }
@@ -121,6 +139,18 @@ export const propertiesPanelNeedsRefreshReducer = (state = false, action) => {
     }
 };
 
+export const stylePanelOpenReducer = (state = false, action) => {
+    switch (action.type) {
+        case 'TOGGLE_STYLE_PANEL':
+            return !state;
+        case 'OPEN_STYLE_PANEL':
+            return true;
+        case 'CLOSE_STYLE_PANEL':
+            return false;
+        default:
+            return state;
+    }
+};
 export const behaviorPanelOpenReducer = (state = false, action) => {
     switch (action.type) {
         case 'TOGGLE_BEHAVIOR_PANEL':
@@ -193,6 +223,35 @@ export const followBodiesReducer = (state = {}, action) => {
                 ...state,
                 [action.gameState]: -1
             };
+        }
+        default:
+            return state;
+    }
+};
+
+export const floatingTextReducer = (state = {}, action) => {
+    switch (action.type) {
+        case 'ADD_FLOATING_TEXT': {
+            const newState = { ...state };
+            newState[action.textObj.id] = action.textObj;
+            return newState;
+        }
+        case 'REMOVE_FLOATING_TEXT': {
+            return Object.keys(state).reduce((acc, curr) => {
+                if (action.id !== parseInt(curr, 10)) {
+                    acc[curr] = state[curr];  //eslint-disable-line
+                }
+                return acc;
+            }, {});
+        }
+        case 'UPDATE_FLOATING_TEXT': {
+            return Object.keys(state).reduce((acc, curr) => {
+                acc[curr] = state[curr];            //eslint-disable-line
+                if (action.id === parseInt(curr, 10)) {
+                    acc[curr].text = action.text;   //eslint-disable-line
+                }
+                return acc;
+            }, {});
         }
         default:
             return state;

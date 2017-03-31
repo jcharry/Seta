@@ -4,7 +4,7 @@ function CollisionEvent(stateId, bodyId, collidingBody, action, resolution) {
     this.collidingBody = collidingBody;
     this.action = action;
     this.resolution = resolution;
-    this.id = `b${bodyId}-c${collidingBody}-a${action}-s${stateId}`;
+    this.id = `b:${bodyId}-c:${collidingBody}-a:${action}-r:${resolution}-s:${stateId}`;
     this.type = 'collision';
 }
 

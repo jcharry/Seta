@@ -213,7 +213,7 @@ class SelectedObjectPane extends React.Component {
                     case 'velocity:y':
                     case 'velocity:x': {
                         const newState = { ...selectedObj[props[0]] };
-                        newState[props[1]] = val.toFixed(this.inputTruncation[props[0]]);
+                        newState[props[1]] = val; //.toFixed(this.inputTruncation[props[0]]);
                         GameState.setInitialProperty(selectedObj, props[0], newState);
                         this.setState({
                             [props[0]]: newState

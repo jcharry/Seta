@@ -1,0 +1,16 @@
+.draggable {
+    position: absolute;
+    cursor: grab;
+}
+
+.react-draggable {
+    position: absolute;
+    top: 0;
+    left: 0;
+    
+    p {
+        margin: 0;
+        cursor: move;
+        text-align: center;
+    }
+}

@@ -19,6 +19,12 @@ export const removeGameObject = id => ({
     id
 });
 
+export const updateGameObject = (id, properties) => ({
+    type: 'UPDATE_GAME_OBJECT',
+    id,
+    properties
+});
+
 export const clearBodies = () => ({
     type: 'CLEAR_BODIES'
 });
@@ -85,6 +91,12 @@ export const propertiesPanelNeedsRefresh = needsRefresh => ({
     needsRefresh
 });
 
+export const closeStylePanel = () => ({
+    type: 'CLOSE_STYLE_PANEL'
+});
+export const openStylePanel = () => ({
+    type: 'OPEN_STYLE_PANEL'
+});
 export const closeBehaviorPanel = () => ({
     type: 'CLOSE_BEHAVIOR_PANEL'
 });
@@ -129,3 +141,26 @@ export const clearFollowBody = gameState => ({
     gameState
 });
 
+export const deselectAll = () =>
+    dispatch => {
+        dispatch(setSelectedObject(-1));
+        dispatch(setPrimativesPanelSelection(''));
+        dispatch(setIsPlaying(false));
+        dispatch(closeBehaviorPanel());
+        dispatch(closeStylePanel());
+    };
+
+export const addFloatingText = textObj => ({
+    type: 'ADD_FLOATING_TEXT',
+    textObj
+});
+export const removeFloatingText = id => ({
+    type: 'REMOVE_FLOATING_TEXT',
+    id
+});
+
+export const updateFloatingText = (id, text) => ({
+    type: 'UPDATE_FLOATING_TEXT',
+    id,
+    text
+});

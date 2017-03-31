@@ -1,0 +1,52 @@
+.style-panel {
+    position: fixed;
+    top: 160px;
+    right: 200px;
+    width: 600px;
+    background-color: $panel-color-alternate;
+
+    padding: 1rem;
+
+    p {
+        padding: 0;
+        margin: 0;
+        font-size: 1rem;
+    }
+    h2 {
+        padding: 0;
+        margin: 0;
+        margin-right: 1rem;
+    }
+
+    .rc-color-picker-wrap {
+        margin: 0;
+    }
+
+    .close-btn {
+        position: absolute;
+        top: 0;
+        right: 0;
+    }
+
+    input {
+        background-color: $panel-color-alternate;
+        border: none;
+        border-bottom: 1px solid black;
+        color: $font-color;
+        outline: none;
+        font-size: 1rem;
+    }
+
+    div {
+        display: flex;
+        width: 80%;
+        margin: 1rem 0;
+
+        p {
+            padding-right: 20px;
+        }
+    }
+}
+// p {
+//     color: red;
+// }

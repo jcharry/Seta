@@ -14,7 +14,7 @@ class DestroySelect extends React.Component {
             if (opt.id === selected) {
                 return 'itself';
             }
-            return `${opt.id}: ${opt.label}`;
+            return `${opt.id}: ${opt.name || opt.label}`;
         }
 
         const renderOptions = () => {

@@ -13,9 +13,11 @@ import {
     needsNewGameStateReducer,
     propertiesPanelNeedsRefreshReducer,
     behaviorPanelOpenReducer,
+    stylePanelOpenReducer,
     behaviorsReducer,
     scoreReducer,
-    followBodiesReducer
+    followBodiesReducer,
+    floatingTextReducer
 } from '../reducers/reducers';
 
 const configure = (initialState = {}) => {
@@ -32,7 +34,9 @@ const configure = (initialState = {}) => {
         behaviorPanelOpen: behaviorPanelOpenReducer,
         behaviors: behaviorsReducer,
         score: scoreReducer,
-        followBodies: followBodiesReducer
+        followBodies: followBodiesReducer,
+        stylePanelOpen: stylePanelOpenReducer,
+        floatingText: floatingTextReducer
     });
 
     const store = redux.createStore(reducer, initialState, redux.compose(

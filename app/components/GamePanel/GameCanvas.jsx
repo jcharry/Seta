@@ -9,8 +9,11 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import * as actions from 'actions';
+import Popup from 'components/Popup/Popup';
+import Draggable from 'react-draggable'; // The default
 
 import _ from 'underscore';
+import * as utils from 'utils/utils';
 
 import Score from 'components/Score';
 
@@ -24,6 +27,7 @@ class GameCanvas extends React.Component {
 
         // Bound class methods
         this.renderCanvas = this.renderCanvas.bind(this);
+        this.textIds = 0;
         this.updateEngine = this.updateEngine.bind(this);
         this.drawSelectedBody = this.drawSelectedBody.bind(this);
         this.initializeEventListeners = this.initializeEventListeners.bind(this);
@@ -33,6 +37,9 @@ class GameCanvas extends React.Component {
         this.clearKeyboardEvents = this.clearKeyboardEvents.bind(this);
         this.refresh = this.refresh.bind(this);
         this.cleanupScene = this.cleanupScene.bind(this);
+        this.handleTextClick = this.handleTextClick.bind(this);
+        this.updateTextObjectPosition = this.updateTextObjectPosition.bind(this);
+
         this.canvasOffset = { x: 0, y: 0 };
         this.keyMap = {};
 
@@ -53,6 +60,7 @@ class GameCanvas extends React.Component {
             const { width, height } = this.container.getBoundingClientRect();
             this.canvas.width = width;
             this.canvas.height = height;
+            this.bounds = { x: 0, y: 0, width, height };
             this.ctx = this.canvas.getContext('2d');
 
             // Translate the ctx to ensure clean lines
@@ -115,7 +123,8 @@ class GameCanvas extends React.Component {
             gameObjects,
             behaviors,
             // isPlaying,
-            followBodies
+            followBodies,
+            dispatch
         } = this.props;
 
         // Check for isPlaying
@@ -172,7 +181,8 @@ class GameCanvas extends React.Component {
 
         // Do we need to switch game states?
         if (!_.isEqual(prevProps.gameStates, gameStates)) {
-            console.log('should switch game states');
+            // console.log('should switch game states');
+            dispatch(actions.deselectAll());
             this.switchGameState();
         }
 
@@ -220,7 +230,8 @@ class GameCanvas extends React.Component {
     */
     refresh() {
         // this.ctx.translate(-this.canvasOffset.x, -this.canvasOffset.y);
-        this.activeState.restore();
+        const { gameObjects } = this.props;
+        this.activeState.restore(gameObjects);
         Matter.Mouse.setOffset(this.mouse, this.activeState.camera.view.min);
     }
 
@@ -316,29 +327,45 @@ class GameCanvas extends React.Component {
         let mouseBodyOffsetX = 0;
         let mouseBodyOffsetY = 0;
 
-        this.canvas.addEventListener('mousedown', () => {
-            const { primativesPanelSelection } = this.props;
+        this.canvas.addEventListener('mousedown', (e) => {
+            const { primativesPanelSelection, isPlaying } = this.props;
+
+            // Don't allow for object manipulation while game is playing
+            // TODO: Add any user added mouse interactions here in the future
+            if (isPlaying) { return; }
 
             // Make sure behaviorPanel is closed
             dispatch(actions.closeBehaviorPanel());
+            dispatch(actions.closeStylePanel());
+
+            const mouseX = this.mouse.mousedownPosition.x;
+            const mouseY = this.mouse.mousedownPosition.y;
 
             // Keep track of mouse position for panning
-            this.mouse.lastMousePos.x = this.mouse.mousedownPosition.x;
-            this.mouse.lastMousePos.y = this.mouse.mousedownPosition.y;
+            this.mouse.lastMousePos.x = mouseX;
+            this.mouse.lastMousePos.y = mouseY;
 
             // Handle a few different cases
             // 1. If user clicks while an object is selected in the left panel,
             // Add primative body
-            if (primativesPanelSelection === 'Rectangle' || primativesPanelSelection === 'Circle') {
+            if (primativesPanelSelection === 'Rectangle' || primativesPanelSelection === 'Circle' || primativesPanelSelection === 'Sensor') {
                 // Add the body to the world
                 const body = this.activeState.bodyFactory(
                     primativesPanelSelection, {
-                        x: this.mouse.mousedownPosition.x,
-                        y: this.mouse.mousedownPosition.y
+                        x: mouseX,
+                        y: mouseY
                     }
                 );
                 this.activeState.addBody(body, this.props.isPlaying);
             }                                                       //eslint-disable-line
+            // if (primativesPanelSelection === 'Sensor') {
+            //     const sensor = this.activeState.bodyFactory(
+            //         primativesPanelSelection, {
+            //             x: mouseX,
+            //             y: mouseY
+            //         }
+            //     );
+            // }
 
             // 2. If a constraint is selected
             else if (primativesPanelSelection === 'Rope' || primativesPanelSelection === 'Spring' || primativesPanelSelection === 'Rod') {
@@ -367,7 +394,24 @@ class GameCanvas extends React.Component {
                 }
             }                                                       //eslint-disable-line
 
-            // 3. Nothing Selected, query for bodies, or get ready to pan the
+
+            // 3. It's a Text Element
+            else if (primativesPanelSelection === 'Text') {
+                let txtObj = {
+                    id: Matter.Common.nextId(),
+                    type: 'text',
+                    x: this.mouse.position.x,
+                    y: this.mouse.position.y,
+                    text: 'CHANGE ME',
+                    gameState: this.activeState.id,
+                    label: 'Text'
+                };
+
+                dispatch(actions.addGameObject(txtObj))
+                // dispatch(actions.addFloatingText(txtObj));
+            }
+
+            // 4. Nothing Selected, query for bodies, or get ready to pan the
             //    world
             else {
                 this.isMouseDown = true;
@@ -387,8 +431,12 @@ class GameCanvas extends React.Component {
         this.canvas.addEventListener('mousemove', () => {
             if (this.isMouseDown) {
                 if (draggableBody) {
-                    this.activeState.setInitialProperty(draggableBody, 'position', { x: this.mouse.position.x - mouseBodyOffsetX, y: this.mouse.position.y - mouseBodyOffsetY });
-                    dispatch(actions.propertiesPanelNeedsRefresh(true));
+                    if (draggableBody.type === 'body') {
+                        this.activeState.setInitialProperty(draggableBody, 'position', { x: this.mouse.position.x - mouseBodyOffsetX, y: this.mouse.position.y - mouseBodyOffsetY });
+                        dispatch(actions.propertiesPanelNeedsRefresh(true));
+                    } else if (draggableBody.type === 'text') {
+
+                    }
                 } else {
                     // Pan the world.
                     this.activeState.camera.pan();
@@ -417,18 +465,21 @@ class GameCanvas extends React.Component {
             // Look through active state behaviors and see if any match the
             // pair of bodies
 
-            // change object colours to show those starting a collision
+            const behaviorsToExecute = [];
             for (let i = 0; i < pairs.length; i++) {
                 const pair = pairs[i];
                 for (let j = 0; j < this.activeState.behaviors.length; j++) {
                     const behavior = this.activeState.behaviors[j];
                     if (pair.bodyA.id === behavior.body && pair.bodyB.id === behavior.collidingBody) {
-                        this.activeState.resolveBehavior(behavior);
+                        behaviorsToExecute.push(behavior);
+                        // this.activeState.resolveBehavior(behavior);
                     } else if (pair.bodyB.id === behavior.body && pair.bodyA.id === behavior.collidingBody) {
-                        this.activeState.resolveBehavior(behavior);
+                        behaviorsToExecute.push(behavior);
+                        // this.activeState.resolveBehavior(behavior);
                     }
                 }
             }
+            behaviorsToExecute.forEach(b => this.activeState.resolveBehavior(b));
         });
     }
 
@@ -458,6 +509,7 @@ class GameCanvas extends React.Component {
         this.ctx.beginPath();
         this.ctx.strokeStyle = 'red';
         switch (primativesPanelSelection) {
+            case 'Sensor':
             case 'Rectangle':
                 this.ctx.rect(this.mouse.position.x - 25, this.mouse.position.y - 25, 50, 50);
                 this.ctx.stroke();
@@ -483,6 +535,9 @@ class GameCanvas extends React.Component {
         }
     }
 
+    drawTemporaryText() {
+        this.ctx.strokeRect(this.mouse.position.x, this.mouse.position.y, 200, 40);
+    }
     /**
      * Handle different rendering cases for PrimativePanel Selection
     */
@@ -492,13 +547,11 @@ class GameCanvas extends React.Component {
             case 'Rectangle':
             case 'Circle':
             case 'Polygon':
+            case 'Sensor':
                 this.drawSelectedBody.call(this);
                 break;
-            //TODO: Handle these cases, which require two clicks...
-            case 'Rope':
-            case 'Spring':
-            case 'Rod':
-                break;
+            case 'Text':
+                this.drawTemporaryText();
             default:
                 break;
         }
@@ -508,7 +561,7 @@ class GameCanvas extends React.Component {
      * Renderer
     */
     renderCanvas() {
-        const { isPlaying, primativesPanelSelection, selectedObject } = this.props;
+        const { isPlaying, gameObjects, primativesPanelSelection, selectedObject } = this.props;
 
         // clear the canvas with a transparent fill, to allow the canvas background to show
         const world = this.activeState.world;
@@ -534,6 +587,9 @@ class GameCanvas extends React.Component {
         // Draw world bounds
         this.ctx.beginPath();
         this.ctx.strokeStyle = 'black';
+        if (gameObjects[selectedObject] && gameObjects[selectedObject].label === 'World') {
+            this.ctx.strokeStyle = 'red';
+        }
         this.ctx.lineWidth = 10;
         this.ctx.strokeRect(worldX, worldY, worldWidth, worldHeight);
         this.ctx.lineWidth = 1;
@@ -546,9 +602,9 @@ class GameCanvas extends React.Component {
                 this.ctx.fillStyle = body.render.fillStyle || 'transparent';
                 this.ctx.lineWidth = 1;
                 if (body.id === selectedObject) {
-                    this.ctx.strokeStyle = 'darkgreen';
-                    this.ctx.fillStyle = 'lightgreen';
-                    this.ctx.lineWidth = 2;
+                    this.ctx.strokeStyle = 'red';
+                    // this.ctx.fillStyle = 'lightgreen';
+                    this.ctx.lineWidth = 6;
                 }
 
                 const vertices = body.vertices;
@@ -561,10 +617,13 @@ class GameCanvas extends React.Component {
 
                 this.ctx.lineTo(vertices[0].x, vertices[0].y);
 
+                if (!body.isSensor) {
+                    this.ctx.fill();
+                }
                 this.ctx.stroke();
-                this.ctx.fill();
             }
         }
+
 
         for (let i = 0; i < this.activeState.constraints.length; i++) {
             const c = this.activeState.constraints[i];
@@ -593,15 +652,55 @@ class GameCanvas extends React.Component {
         window.requestAnimationFrame(this.renderCanvas);
     }
 
+    handleTextClick(id) {
+        const { dispatch } = this.props;
+        dispatch(actions.setSelectedObject(id));
+    }
+    handleTextDrag(e) {
+        console.log(e);
+    }
+    handleTextDragStart(e) {
+        console.log('started', e);
+    }
+
+    updateTextObjectPosition(e, txtObj) {
+        const { dispatch } = this.props;
+        console.log('stopped', e);
+        // const { gameObjects, dispatch } = this.props;
+        let x = e.layerX - e.offsetX;
+        let y = e.layerY - e.offsetY;
+        dispatch(actions.updateGameObject(txtObj.id, {x, y}));
+    }
+
     /**
      * React Lifecycle
      * Just draw the canvas
     */
     render() {
+        const { gameObjects, selectedObject } = this.props;
+        // let textObjects = Object.keys(gameObjects).filter(key => gameObjects[key].type === 'text').map(key => gameObjects[key]);
+        let textObjects = utils.getObjectsOfType(gameObjects, 'text');
         return (
             <div className='game-canvas' ref={elt => { this.container = elt; }}>
                 <canvas ref={elt => { window.canvas = elt; this.canvas = elt; }} id='game-canvas' />
                 <Score />
+                <Popup ignoreLabels={['World', 'Constraint']} bounds={this.bounds} />
+                {textObjects.map(txtObj => {
+                    let style = {};
+                    if (txtObj.id === selectedObject) {
+                        style.border = '3px solid red';
+                    }
+                    style.userSelect = 'none';
+                    return (<Draggable
+                        onStart={this.handleTextDragStart}
+                        onStop={(e) => { this.updateTextObjectPosition(e, txtObj) }}
+                        position={{x: txtObj.x, y: txtObj.y}}
+                        bounds='#game-canvas'
+                        zIndex={100}
+                        key={`text-${txtObj.id}`}>
+                        <div onClick={() => { this.handleTextClick(txtObj.id); }} style={style}><p>{txtObj.text}</p></div>
+                    </Draggable>);
+                })}
             </div>
         );
     }
@@ -621,7 +720,8 @@ GameCanvas.propTypes = {
     gameStates: React.PropTypes.object.isRequired,
     gameObjects: React.PropTypes.object.isRequired,
     behaviors: React.PropTypes.object.isRequired,
-    followBodies: React.PropTypes.object.isRequired
+    followBodies: React.PropTypes.object.isRequired,
+    floatingText: React.PropTypes.object.isRequired
 };
 
 export default connect(state => ({
@@ -633,5 +733,7 @@ export default connect(state => ({
     gameStates: state.gameStates,
     gameObjects: state.gameObjects,
     behaviors: state.behaviors,
-    followBodies: state.followBodies
+    followBodies: state.followBodies,
+    floatingText: state.floatingText
 }))(GameCanvas);
+

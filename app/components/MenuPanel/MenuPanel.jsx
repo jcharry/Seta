@@ -29,6 +29,8 @@ class MenuPanel extends React.Component {
     handlePlay() {
         const { dispatch } = this.props;
         dispatch(actions.setIsPlaying(true));
+        dispatch(actions.setSelectedObject(-1));
+        dispatch(actions.setPrimativesPanelSelection(''));
     }
 
     handleStop() {
@@ -50,9 +52,10 @@ class MenuPanel extends React.Component {
                     {/* <p>new</p> */}
                     {/* <p>load</p> */}
                     {/* <p>save</p> */}
+                    <p>help</p>
                 </div>
                 <div className='menu-right'>
-                    <button className='menu-panel-button' onClick={this.togglePlay}><img src={isPlaying ? pauseIcon : playIcon} alt='play/pause' /></button>
+                    <button className='menu-panel-button' onClick={isPlaying ? this.handleStop : this.handlePlay}><img src={isPlaying ? pauseIcon : playIcon} alt='play/pause' /></button>
                     {/* <button className='menu-panel-button' onClick={this.handleStop}><img src={stopIcon} alt='stop' /></button> */}
                     <button className='menu-panel-button' onClick={this.handleRestart}><img src={restartIcon} alt='restart' /></button>
                 </div>

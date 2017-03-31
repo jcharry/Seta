@@ -23,13 +23,15 @@ class ObjectsListItem extends React.Component {
 
     handleEditClicked() {
         const { dispatch } = this.props;
-        // e.stopPropagation();
         dispatch(actions.openBehaviorPanel());
     }
 
     handleRemoveItem(e) {
-        const { dispatch, body } = this.props;
+        const { dispatch, body, selectedObject } = this.props;
         e.stopPropagation();
+        if (body.id === selectedObject) {
+            dispatch(actions.setSelectedObject(-1));
+        }
         dispatch(actions.removeGameObject(body.id));
     }
 
@@ -45,8 +47,8 @@ class ObjectsListItem extends React.Component {
         }
         return (
             <li className={isActive ? 'objects-list-item active' : 'objects-list-item'} onClick={this.handleClick}>
-                {body.label !== 'World' && body.type !== 'constraint' && <img className='edit' src={isActive ? pencilWhiteImg : pencilBlackImg} onClick={this.handleEditClicked} alt='edit' /> }
-                <p className='label'>{body.id}: {body.label}</p>
+                {/* {body.label !== 'World' && body.type !== 'constraint' && <img className='edit' src={isActive ? pencilWhiteImg : pencilBlackImg} onClick={this.handleEditClicked} alt='edit' /> } */}
+                <p className='label'>{body.id}: {body.name || body.label}</p>
 
                 {/* Cannot delete the world */}
                 {body.label !== 'World' && <img src={isActive ? deleteWhiteImg : deleteBlackImg} alt={`delete object ${body.id}`} onClick={this.handleRemoveItem} />}

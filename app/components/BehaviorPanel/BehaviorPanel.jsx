@@ -2,6 +2,10 @@
     "class-methods-use-this": "off"
 */
 /* TODO: This component is a mess */
+/* FIXME: Also, I've duplicated the skeleton of this
+ * component as the Style Panel - SUPER WRONG!!!
+ * FIX THAT AT SOME POINT
+ */
 
 import React from 'react';
 import { connect } from 'react-redux';
@@ -22,12 +26,8 @@ class BehaviorPanel extends React.Component {
     constructor(props) {
         super(props);
 
-        // const { gameStates } = this.props;
-        // const activeStateId = utils.getActiveGameState(gameStates);
-        // const otherGameStates = Object.keys(gameStates).map(key => parseInt(key, 10)).filter(id => id !== activeStateId);
-
         this.state = {
-            follow: false,
+            // follow: false,
             collision: {
                 obj: '-1',
                 action: 'score',
@@ -62,11 +62,6 @@ class BehaviorPanel extends React.Component {
             'velocity down',
             'velocity left',
             'velocity right'
-            // 'move up',
-            // 'move down',
-            // 'move left',
-            // 'move right',
-            // 'shoot'
         ];
 
         this.keys = 'abcdefghijklmnopqrstuvwxyz1234567890'.split('');
@@ -79,20 +74,20 @@ class BehaviorPanel extends React.Component {
         this.handleAddControl = this.handleAddControl.bind(this);
         this.handleDeleteBehavior = this.handleDeleteBehavior.bind(this);
         this.validateInput = this.validateInput.bind(this);
-        this.handleFollowBodyChange = this.handleFollowBodyChange.bind(this);
+        // this.handleFollowBodyChange = this.handleFollowBodyChange.bind(this);
     }
 
     componentDidUpdate(prevProps) {
-        const { gameStates, followBodies, selectedObject } = this.props;
-        const activeStateId = utils.getActiveGameState(gameStates);
-        // If the selected object changes, make sure the follow body checkbox
-        // is in sync.  We set the state of the checkbox based on whether the
-        // current follow body is what's currently selected
-        if (prevProps.selectedObject !== selectedObject) {
-            this.setState({ //eslint-disable-line
-                follow: followBodies[activeStateId] === selectedObject
-            });
-        }
+        // const { gameStates, followBodies, selectedObject } = this.props;
+        // const activeStateId = utils.getActiveGameState(gameStates);
+        // // If the selected object changes, make sure the follow body checkbox
+        // // is in sync.  We set the state of the checkbox based on whether the
+        // // current follow body is what's currently selected
+        // if (prevProps.selectedObject !== selectedObject) {
+        //     this.setState({ //eslint-disable-line
+        //         follow: followBodies[activeStateId] === selectedObject
+        //     });
+        // }
     }
 
     handleClose() {
@@ -165,14 +160,14 @@ class BehaviorPanel extends React.Component {
                 });
                 break;
             }
-            case 'follow': {
-                this.handleFollowBodyChange(e.target.checked);
-                this.setState({
-                    ...this.state,
-                    follow: e.target.checked
-                });
-                break;
-            }
+            // case 'follow': {
+            //     this.handleFollowBodyChange(e.target.checked);
+            //     this.setState({
+            //         ...this.state,
+            //         follow: e.target.checked
+            //     });
+            //     break;
+            // }
             case 'change world': {
                 this.setState({
                     collision: {
@@ -187,15 +182,15 @@ class BehaviorPanel extends React.Component {
         }
     }
 
-    handleFollowBodyChange(checked) {
-        const { selectedObject, dispatch, gameStates } = this.props;
-        const activeStateId = utils.getActiveGameState(gameStates);
-        if (checked) {
-            dispatch(actions.changeFollowBody(activeStateId, selectedObject));
-        } else {
-            dispatch(actions.clearFollowBody(activeStateId));
-        }
-    }
+    // handleFollowBodyChange(checked) {
+    //     const { selectedObject, dispatch, gameStates } = this.props;
+    //     const activeStateId = utils.getActiveGameState(gameStates);
+    //     if (checked) {
+    //         dispatch(actions.changeFollowBody(activeStateId, selectedObject));
+    //     } else {
+    //         dispatch(actions.clearFollowBody(activeStateId));
+    //     }
+    // }
 
     handleDeleteBehavior(gameState, id) {
         const { dispatch } = this.props;
@@ -243,26 +238,6 @@ class BehaviorPanel extends React.Component {
         const { dispatch, selectedObject, gameStates, behaviors } = this.props;
         const resolution = this.state.control.action;
 
-        // switch (this.state.control.action) {
-        //     case 'force right':
-        //     case 'force left':
-        //     case 'force up':
-        //     case 'force down':
-        //         // resolution = this.state.control
-        //         break;
-        //
-        //     case 'move left':
-        //     case 'move right':
-        //     case 'move down':
-        //     case 'move up':
-        //         break;
-        //
-        //     case 'shoot':
-        //         break;
-        //     default:
-        //         break;
-        // }
-
         const activeStateId = utils.getActiveGameState(gameStates);
         const activeBehaviors = behaviors[activeStateId];
         const control = new ControlEvent(
@@ -300,9 +275,6 @@ class BehaviorPanel extends React.Component {
                 console.warn('something isnt right');
                 return;
         }
-
-        // Catch errors
-        // const err = {};
 
         // Get active gameState
         const activeStateId = utils.getActiveGameState(gameStates);
@@ -394,6 +366,7 @@ class BehaviorPanel extends React.Component {
             }
         }
 
+        // This should really be it's own component
         const renderControlBehaviors = () => {
             if (controlBehaviors.length > 0) {
                 return (
@@ -413,17 +386,44 @@ class BehaviorPanel extends React.Component {
             return null;
         };
 
+        // This should really be it's own component...
         const renderCollisionBehaviors = () => {
             if (collisionBehaviors.length > 0) {
                 return (
                     <div className='current'>
                         <h3>Current</h3>
                         <ol className='behavior-list'>
-                            {collisionBehaviors.map(behavior =>
-                                <li className='behavior-item' key={behavior.id}>
-                                    <div>This body hits <span className='highlight'>body {behavior.collidingBody}</span> which causes <span className='highlight'>{behavior.action}</span> to <span className='highlight'>{behavior.resolution}</span></div>
-                                    <img alt='delete behavior' onClick={() => { this.handleDeleteBehavior(behavior.gameState, behavior.id); }} src={deleteImg} />
-                                </li>
+                            {collisionBehaviors.map(behavior => {
+                                let elt;
+                                const collidingBody = gameObjects[behavior.collidingBody];
+                                const label = collidingBody.name || collidingBody.label;
+                                switch (behavior.action) {
+                                    case 'destroy':
+                                        let resolutionText = `${collidingBody.id}: ${collidingBody.name || collidingBody.label}`;
+                                        if (behavior.body === behavior.resolution) {
+                                            resolutionText = 'itself';
+                                        }
+                                        return <li className='behavior-item' key={behavior.id}>
+                                                <div>This body hits <span className='highlight'>body {behavior.collidingBody}: {label}</span> and <span className='highlight'>destroys</span> to <span className='highlight'>{resolutionText}</span></div>
+                                                <img alt='delete behavior' onClick={() => { this.handleDeleteBehavior(behavior.gameState, behavior.id); }} src={deleteImg} />
+                                            </li>
+                                        break;
+                                    case 'score':
+                                            return <li className='behavior-item' key={behavior.id}>
+                                                <div>This body hits <span className='highlight'>body {behavior.collidingBody}: {label}</span> changing the <span className='highlight'>score</span> by <span className='highlight'>{behavior.resolution}</span></div>
+                                                <img alt='delete behavior' onClick={() => { this.handleDeleteBehavior(behavior.gameState, behavior.id); }} src={deleteImg} />
+                                            </li>
+
+                                        break;
+                                    case 'change world':
+                                            return <li className='behavior-item' key={behavior.id}>
+                                                <div>This body hits <span className='highlight'>body {behavior.collidingBody}: {label}</span> which moves player to <span className='highlight'>world {behavior.resolution}</span></div>
+                                                <img alt='delete behavior' onClick={() => { this.handleDeleteBehavior(behavior.gameState, behavior.id); }} src={deleteImg} />
+                                            </li>
+                                        break;
+                                }
+
+                                }
                             )}
                         </ol>
                     </div>
@@ -435,10 +435,10 @@ class BehaviorPanel extends React.Component {
         return (
             <div className={clsName}>
                 <img className='close-btn' onClick={this.handleClose} src={closeImg} alt='close button' />
-                <div className='follow'>
-                    <h2>Set Camera to Follow</h2>
-                    <input type='checkbox' checked={this.state.follow} onChange={this.handleChange} name='follow' />
-                </div>
+                {/* <div className='follow'> */}
+                {/*     <h2>Set Camera to Follow</h2> */}
+                {/*     <input type='checkbox' checked={this.state.follow} onChange={this.handleChange} name='follow' /> */}
+                {/* </div> */}
                 <div className='collisions'>
                     <h2>Collisions</h2>
                     <h3>Add New:</h3>
@@ -456,7 +456,7 @@ class BehaviorPanel extends React.Component {
                                 return gameObject.type === 'body';
                             }).map(key => {
                                 const body = gameObjects[key];
-                                return <option value={body.id} key={key}>{`${body.id}: ${body.label}`}</option>;
+                                return <option value={body.id} key={key}>{`${body.id}: ${body.name || body.label}`}</option>;
                             }))}
                         </select>
                         <p>causing</p>

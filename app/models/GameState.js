@@ -63,15 +63,19 @@ GameState.prototype.setRenderBounds = function(x, y, width, height) {
 
 GameState.prototype.addConstraint = function(type, bodyA, bodyB) {
     let stiffness;
+    let name;
     switch (type) {
         case 'Rope':
             stiffness = 0.1;
+            name = 'Rope';
             break;
         case 'Rod':
             stiffness = 1;
+            name = 'Rod';
             break;
         case 'Spring':
             stiffness = 0.01;
+            name = 'Spring';
             break;
         default:
             break;
@@ -81,6 +85,7 @@ GameState.prototype.addConstraint = function(type, bodyA, bodyB) {
         bodyB,
         stiffness
     });
+    c.name = name;
 
     this.constraints.push(c);
     this.initialConstraints.push(c);
@@ -138,7 +143,6 @@ GameState.prototype.setInitialProperty = function(body, property, value) {
         const scaleChangeY = targetScaleY / initialScaleY;
         Matter.Body.scale(body, scaleChangeX, scaleChangeY);
     } else {
-        // let v = utils.truncateValue(property, value);
         Matter.Body.set(body, property, value);
     }
     this.updateBodyInitialState(body, property);
@@ -150,6 +154,8 @@ GameState.prototype.setInitialProperty = function(body, property, value) {
  * off the bat
  */
 GameState.prototype.initializeBodyState = function(body) {
+    // FIXME: Start up here -> Adding a sensor breaks this function
+    // somehow
     body.originalProperties = {};   //eslint-disable-line
     const p = body.originalProperties;
     p.density = body.density;
@@ -245,6 +251,7 @@ GameState.prototype.bodyFactory = function(type, params) {
     switch (type) {
         case 'Rectangle':
             b = Matter.Bodies.rectangle(x, y, width, height, { isStatic: isFixed });
+            b.name = 'Rectangle';
             b.scaleX = 1;
             b.scaleY = 1;
             b._creationSize = {
@@ -258,6 +265,7 @@ GameState.prototype.bodyFactory = function(type, params) {
             break;
         case 'Circle':
             b = Matter.Bodies.circle(x, y, radius);
+            b.name = 'Circle';
             b.scaleX = 1;
             b.scaleY = 1;
             b._creationSize = {
@@ -269,6 +277,20 @@ GameState.prototype.bodyFactory = function(type, params) {
             break;
         case 'Polygon':
             b = null;
+            break;
+        case 'Sensor':
+            b = Matter.Bodies.rectangle(x, y, width, height, { isSensor: true, isStatic: true });
+            b.name = 'Sensor';
+            b.scaleX = 1;
+            b.scaleY = 1;
+            b._creationSize = {
+                width,
+                height
+            };
+            b.size = {
+                width,
+                height
+            };
             break;
         default:
             b = null;
@@ -317,126 +339,130 @@ GameState.prototype.isBodyColliding = function(body) {
         }
     });
     return isColliding;
-}
+};
 
 // TODO: Move resolution into Behavior Objects
 GameState.prototype.resolveBehavior = function(behavior) {
     const bodyId = behavior.body;
     const body = this.bodies.filter(b => b.id === bodyId)[0];
 
-    if (body) {
-        switch (behavior.type) {
-            case 'control':
-                if (behavior.condition === 'colliding') {
-                    console.log(behavior.condition);
+    switch (behavior.type) {
+        case 'control':
+            if (behavior.condition === 'colliding') {
+                console.log(behavior.condition);
 
-                    // Return early and don't fire collision unless the body is
-                    // actively colliding with something.
-                    if (!this.isBodyColliding(body)) return;
+                // Return early and don't fire collision unless the body is
+                // actively colliding with something.
+                if (!this.isBodyColliding(body)) { return; }
+            }
+            switch (behavior.action) {
+                case 'force up':
+                case 'force down': {
+                    const dir = behavior.action.substr(6);
+                    let yForce = 0;
+                    if (dir === 'up') {
+                        yForce = -0.01;
+                    } else if (dir === 'down') {
+                        yForce = 0.01;
+                    }
+
+                    Matter.Body.applyForce(body, body.position, { x: 0, y: yForce });
+                    break;
                 }
-                switch (behavior.action) {
-                    case 'force up':
-                    case 'force down': {
-                        const dir = behavior.action.substr(6);
-                        let yForce = 0;
-                        if (dir === 'up') {
-                            yForce = -0.01;
-                        } else if (dir === 'down') {
-                            yForce = 0.01;
-                        }
-
-                        Matter.Body.applyForce(body, body.position, { x: 0, y: yForce });
-                        break;
+                case 'force left':
+                case 'force right': {
+                    const dir = behavior.action.substr(6);
+                    let xForce = 0;
+                    if (dir === 'left') {
+                        xForce = -0.01;
+                    } else if (dir === 'right') {
+                        xForce = 0.01;
                     }
-                    case 'force left':
-                    case 'force right': {
-                        const dir = behavior.action.substr(6);
-                        let xForce = 0;
-                        if (dir === 'left') {
-                            xForce = -0.01;
-                        } else if (dir === 'right') {
-                            xForce = 0.01;
-                        }
-                        Matter.Body.applyForce(body, body.position, { x: xForce, y: 0 });
-                        break;
-                    }
-                    case 'torque right':
-                        Matter.Body.set(body, 'torque', 1);
-                        break;
-                    case 'torque left': {
-                        Matter.Body.set(body, 'torque', -1);
-                        break;
-                    }
-                    case 'velocity up':
-                        Matter.Body.set(body, 'velocity', {x: body.velocity.x, y: -5});
-                        break;
-                    case 'velocity down':
-                        Matter.Body.set(body, 'velocity', {x: body.velocity.x, y: 5});
-                        break;
-                    case 'velocity left':
-                        Matter.Body.set(body, 'velocity', {x: -5, y: body.velocity.y});
-                        break;
-                    case 'velocity right': {
-                        Matter.Body.set(body, 'velocity', {x: 5, y: body.velocity.y});
-                        break;
-                    }
-                    case 'move left':
-                    case 'move right': {
-                        const dir = behavior.action.substr(5);
-                        let xChange = 0;
-                        if (dir === 'left') {
-                            xChange = -5;
-                        } else if (dir === 'right') {
-                            xChange = 5;
-                        }
-                        Matter.Body.setPosition(body, { x: body.position.x + xChange, y: body.position.y });
-                        break;
-                    }
-                    case 'move up':
-                    case 'move down': {
-                        // Get direction
-                        const dir = behavior.action.substr(5);
-                        let yChange = 0;
-                        if (dir === 'up') {
-                            yChange = -5;
-                        } else if (dir === 'down') {
-                            yChange = 5;
-                        }
-                        Matter.Body.setPosition(body, { x: body.position.x, y: body.position.y + yChange });
-                        break;
-                    }
-                    case 'shoot':
-                        break;
+                    Matter.Body.applyForce(body, body.position, { x: xForce, y: 0 });
+                    break;
                 }
-                break;
-
-
-            case 'collision':
-                switch (behavior.action) {
-                    case 'change world': {
-                        this.dispatch(actions.activateGameState(behavior.resolution));
-                        this.dispatch(actions.setIsPlaying(true));
-                        break;
-                    }
-                    case 'score': {
-                        console.log('score fired');
-                        this.dispatch(actions.addScore(parseInt(behavior.resolution, 10)));
-                        break;
-                    }
-                    case 'destroy': {
-                        console.log('destroy fired');
-                        this.removeGameObject('body', behavior.resolution, true);
-                        break;
-                    }
+                case 'torque right':
+                    Matter.Body.set(body, 'torque', 1);
+                    break;
+                case 'torque left': {
+                    Matter.Body.set(body, 'torque', -1);
+                    break;
                 }
-                break;
-        }
+                case 'velocity up':
+                    Matter.Body.set(body, 'velocity', { x: body.velocity.x, y: -5 });
+                    break;
+                case 'velocity down':
+                    Matter.Body.set(body, 'velocity', { x: body.velocity.x, y: 5 });
+                    break;
+                case 'velocity left':
+                    Matter.Body.set(body, 'velocity', { x: -5, y: body.velocity.y });
+                    break;
+                case 'velocity right': {
+                    Matter.Body.set(body, 'velocity', { x: 5, y: body.velocity.y });
+                    break;
+                }
+                case 'move left':
+                case 'move right': {
+                    const dir = behavior.action.substr(5);
+                    let xChange = 0;
+                    if (dir === 'left') {
+                        xChange = -5;
+                    } else if (dir === 'right') {
+                        xChange = 5;
+                    }
+                    Matter.Body.setPosition(body, { x: body.position.x + xChange, y: body.position.y });
+                    break;
+                }
+                case 'move up':
+                case 'move down': {
+                    // Get direction
+                    const dir = behavior.action.substr(5);
+                    let yChange = 0;
+                    if (dir === 'up') {
+                        yChange = -5;
+                    } else if (dir === 'down') {
+                        yChange = 5;
+                    }
+                    Matter.Body.setPosition(body, { x: body.position.x, y: body.position.y + yChange });
+                    break;
+                }
+                case 'shoot':
+                    break;
+                default:
+                    break;
+            }
+            break;
+
+
+        case 'collision':
+            switch (behavior.action) {
+                case 'change world': {
+                    this.dispatch(actions.activateGameState(behavior.resolution));
+                    this.dispatch(actions.setIsPlaying(true));
+                    break;
+                }
+                case 'score': {
+                    console.log('score fired');
+                    this.dispatch(actions.addScore(parseInt(behavior.resolution, 10)));
+                    break;
+                }
+                case 'destroy': {
+                    console.log('destroy fired');
+                    this.removeGameObject('body', behavior.resolution, true);
+                    break;
+                }
+                default:
+                    break;
+            }
+            break;
+        default:
+            break;
+    }
         // switch (behavior.action) {
         //     default:
         //         console.log('no behavior resolution defined, see GameState.resolveBehavior');
         //         break;
         // }
-    }
 };
 
 GameState.prototype.findConstraints = function(body) {
@@ -454,7 +480,7 @@ GameState.prototype.findBehaviors = function(body) {
  */
 GameState.prototype.removeGameObject = function(type, id, shouldKeep) {
     if (shouldKeep === undefined || shouldKeep === null) {
-        shouldKeep = false;
+        shouldKeep = false; //eslint-disable-line
     }
     switch (type) {
         case 'body':
@@ -522,12 +548,15 @@ GameState.prototype.clearWorld = function() {
  * reset bodies to initialized properties,
  * and remove bodies generated during gameplay
  */
-GameState.prototype.restore = function() {
+GameState.prototype.restore = function(gameObjects) {
     // Need to set redux state "needsRestart" to false,
     // so that we don't update again
     this.dispatch(actions.needsRestart(false));
     this.dispatch(actions.resetScore());
     Matter.World.clear(this.world);
+
+    // Collect all text objects to be added after bodies
+    const textObjects = utils.getObjectsOfType(gameObjects, 'text');
 
     this.bodies = [];
     this.dispatch(actions.clearBodies());
@@ -547,6 +576,12 @@ GameState.prototype.restore = function() {
             this.dispatch(actions.addGameObject(constraint));
         }
     });
+
+    if (textObjects) {
+        textObjects.forEach(txtObj => {
+            this.dispatch(actions.addGameObject(txtObj));
+        });
+    }
 
     // Ensure the engine doesn't update
     this.dispatch(actions.setIsPlaying(false));

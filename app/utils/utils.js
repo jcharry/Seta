@@ -49,3 +49,22 @@ export const truncateValue = function(property, value) {
     }
     return value;
 }
+
+// Keeps value > min and value + offset < max
+export const clamp = function(value, offset, min, max) {
+    if (value < min) {
+        return min;
+    } else if (value + offset > max) {
+        return max - offset;
+    }
+    return value;
+}
+
+export const getObjectsOfType = function(objs, type) {
+    if (typeof objs === 'object' && objs.length) {
+        // Array
+    } else if (typeof objs === 'object') {
+        return Object.keys(objs).filter(key => objs[key].type === type).map(key => objs[key]);
+    }
+
+}
