@@ -273,6 +273,7 @@ class GameCanvas extends React.Component {
 
         // Make sure game is not playing
         dispatch(actions.setIsPlaying(false));
+        dispatch(actions.setActiveState(this.activeState));
     }
 
     initializeKeyboardEvents() {

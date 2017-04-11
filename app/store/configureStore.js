@@ -18,7 +18,8 @@ import {
     scoreReducer,
     followBodiesReducer,
     floatingTextReducer,
-    popupPanelContentReducer
+    popupPanelContentReducer,
+    activeStateReducer
 } from '../reducers/reducers';
 
 const configure = (initialState = {}) => {
@@ -38,7 +39,8 @@ const configure = (initialState = {}) => {
         followBodies: followBodiesReducer,
         stylePanelOpen: stylePanelOpenReducer,
         floatingText: floatingTextReducer,
-        popupPanelContent: popupPanelContentReducer
+        popupPanelContent: popupPanelContentReducer,
+        activeState: activeStateReducer
     });
 
     const store = redux.createStore(reducer, initialState, redux.compose(

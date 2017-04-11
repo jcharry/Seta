@@ -267,3 +267,12 @@ export const floatingTextReducer = (state = {}, action) => {
             return state;
     }
 };
+
+export const activeStateReducer = (state = {}, action) => {
+    switch (action.type) {
+        case 'SET_ACTIVE_STATE':
+            return action.state;
+        default:
+            return state;
+    }
+};

@@ -1,5 +1,4 @@
 // import axios from 'axios';
-
 export const addBody = body => ({
     type: 'ADD_OBJECT',
     body
@@ -168,4 +167,9 @@ export const updateFloatingText = (id, text) => ({
     type: 'UPDATE_FLOATING_TEXT',
     id,
     text
+});
+
+export const setActiveState = state => ({
+    type: 'SET_ACTIVE_STATE',
+    state
 });

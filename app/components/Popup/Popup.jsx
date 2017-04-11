@@ -29,12 +29,13 @@ class Popup extends React.Component {
             let obj = gameObjects[selectedObject];
             let x, y;
             const eltSize = this._elt.getBoundingClientRect();
+            const view = this.props.activeState.camera.view;
             let top, left;
 
             switch (obj.type) {
                 case 'body':
-                    x = obj.position.x;
-                    y = obj.position.y;
+                    x = obj.position.x - view.min.x;
+                    y = obj.position.y - view.min.y;
                     top = clamp(y - (eltSize.height * 2), eltSize.height, 0, bounds.height);
                     left = clamp(x - (eltSize.width / 2), eltSize.width, 0, bounds.width);
                     break;
@@ -125,5 +126,6 @@ export default connect(state => ({
     isPlaying: state.isPlaying,
     selectedObject: state.selectedObject,
     gameObjects: state.gameObjects,
-    propertiesPanelNeedsRefresh: state.propertiesPanelNeedsRefresh
+    propertiesPanelNeedsRefresh: state.propertiesPanelNeedsRefresh,
+    activeState: state.activeState
 }))(Popup);
