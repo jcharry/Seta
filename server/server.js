@@ -8,21 +8,9 @@ const PORT = process.env.PORT || 8093;
 
 app.use(express.static('dist'));
 
-app.get('/', (req, res) => {
-    const ua = req.headers['user-agent'].toLowerCase();
-
-    // Send a message to Mobile and Non-chrome users
-    if (isMobile(ua)) {
-        console.log('ismobile', isMobile(ua));
-        console.log(path.resolve(__dirname, '..', 'dist', 'mobile.html'));
-        res.sendFile(path.resolve(__dirname, '..', 'dist', 'mobile.html'));
-    } else if (!isChrome(ua)) {
-        console.log('not chrome');
-        res.sendFile(path.resolve(__dirname, '..', 'dist', 'notchrome.html'));
-    } else {
-        res.sendFile(path.resolve(__dirname, '..', 'dist', 'main.html'));
-    }
-
+app.get('*', (req, res) => {
+    let f = path.resolve(__dirname, '..', 'dist', 'main.html');
+    res.sendFile(f);
 });
 
 app.listen(PORT, err => {

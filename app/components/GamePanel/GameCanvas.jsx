@@ -113,6 +113,15 @@ class GameCanvas extends React.Component {
         }, 100);
     }
 
+    componentWillUnmount() {
+        console.log('unmounting', this.props);
+        const { dispatch } = this.props;
+        dispatch(actions.cleanup());
+
+        // Reset Matter's ID counter
+        Matter.Common._nextId = 0;
+    }
+
     componentDidUpdate(prevProps) {
         console.log('canvas did update');
         const {

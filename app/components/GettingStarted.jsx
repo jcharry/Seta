@@ -5,15 +5,13 @@
  * Distributed under terms of the MIT license.
  */
 import React from 'react';
+import { Link } from 'react-router';
 
-class GettingStarted extends React.Component {
-    render() {
+export default (props) => {
         return (
-            <div>
-                <p>GETTING STARTED GUIDE HERE</p>
+            <div className='getting-started'>
+                <div className='full-page-fixed background-green'></div>
             </div>
         );
-    }
 }
 
-export default GettingStarted;

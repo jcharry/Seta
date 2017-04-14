@@ -19,6 +19,9 @@ export const gameStatesReducer = (state = {}, action) => {
             });
             return newState;
         }
+        case 'CLEAR_GAME_STATES': {
+            return {};
+        }
         default:
             return state;
     }
@@ -196,6 +199,9 @@ export const behaviorsReducer = (state = {}, action) => {
                 [action.gameState]: state[action.gameState].filter(behavior => !(behavior.id === action.id))
             };
         }
+        case 'CLEAR_BEHAVIORS': {
+            return {};
+        }
         default:
             return state;
     }
@@ -272,6 +278,8 @@ export const activeStateReducer = (state = {}, action) => {
     switch (action.type) {
         case 'SET_ACTIVE_STATE':
             return action.state;
+        case 'CLEAR_ACTIVE_STATE':
+            return {};
         default:
             return state;
     }

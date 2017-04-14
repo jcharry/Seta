@@ -1,0 +1,21 @@
+.getting-started {
+    h1, h2, h3, h4, a, p {
+        font-family: Helvetica;
+    }
+    .content {
+        margin: 4rem;
+    }
+    p {
+        color: $font-color;
+    }
+
+    .img-row {
+        img {
+            display: inline-block;
+            max-width: 50%;
+            max-height: 50%;
+            width: auto;
+            height: auto;
+        }
+    }
+}

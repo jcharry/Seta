@@ -1,0 +1,18 @@
+.full-page {
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    margin: 0;
+    padding: 0;
+}
+
+.full-page-fixed {
+    @extend .full-page;
+    position: fixed;
+    z-index: -1;
+}
+.full-page-absolute {
+    @extend .full-page;
+    position: absolute;
+}

@@ -3,6 +3,7 @@
  */
 import React from 'react';
 import { connect } from 'react-redux';
+import { Link } from 'react-router';
 import * as actions from 'actions';
 
 import playIcon from 'images/Play-48-black.png';
@@ -61,7 +62,7 @@ class MenuPanel extends React.Component {
         return (
             <div className='panel menu-panel'>
                 <div className='menu-left'>
-                    <img src={setaLogo} alt='seta logo'/>
+                    <Link to='/'><img src={setaLogo} alt='seta logo'/></Link>
                     {/* <p>new</p> */}
                     {/* <p>load</p> */}
                     {/* <p>save</p> */}

@@ -1,0 +1,25 @@
+.footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.landing {
+    .background {
+        background-color: $panel-color;
+    }
+    a {
+        width: 45%;
+        text-align: center;
+        height: 70px;
+        color: $panel-color;
+        line-height: 70px;
+        font-size: 18pt;
+        margin: 0 1rem;
+        background-color: orange;
+    }
+}

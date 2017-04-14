@@ -30,6 +30,11 @@
 
 @import 'components/elements/close-button';
 
+@import 'components/full-page';
+
+@import 'components/landing';
+@import 'components/getting-started';
+
 @import url('https://fonts.googleapis.com/css?family=Bahiana|Barrio|Caveat+Brush|Josefin+Sans');
 
 body {
@@ -57,4 +62,11 @@ a {
 
 button {
     cursor: pointer;
+}
+
+.background-green {
+    background-color: $panel-color;
+}
+.background-orange {
+    background-color: orange;
 }

@@ -39,3 +39,4 @@ export default connect(state => ({
     behaviorPanelOpen: state.behaviorPanelOpen,
     stylePanelOpen: state.stylePanelOpen,
 }))(Main);
+

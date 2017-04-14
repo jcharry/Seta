@@ -85,6 +85,11 @@ export const activateGameState = id => ({
     type: 'ACTIVATE_GAME_STATE',
     id
 });
+
+export const clearGameStates = () => ({
+    type: 'CLEAR_GAME_STATES'
+});
+
 export const propertiesPanelNeedsRefresh = needsRefresh => ({
     type: 'PROPERTIES_PANEL_NEEDS_REFRESH',
     needsRefresh
@@ -125,6 +130,10 @@ export const removeBehavior = (gameState, id) => ({
     type: 'REMOVE_BEHAVIOR',
     gameState,
     id
+});
+
+export const clearBehaviors = () => ({
+    type: 'CLEAR_BEHAVIORS'
 });
 
 export const addScore = score => ({
@@ -173,3 +182,17 @@ export const setActiveState = state => ({
     type: 'SET_ACTIVE_STATE',
     state
 });
+
+export const clearActiveState = () => ({
+    type: 'CLEAR_ACTIVE_STATE'
+});
+
+export const cleanup = () =>
+    dispatch => {
+        deselectAll();
+        dispatch(clearBodies());
+        dispatch(clearBehaviors());
+        dispatch(clearGameStates());
+        dispatch(clearActiveState());
+    };
+
