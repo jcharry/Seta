@@ -9,7 +9,7 @@ const PORT = process.env.PORT || 8093;
 app.use(express.static('dist'));
 
 app.get('*', (req, res) => {
-    let f = path.resolve(__dirname, '..', 'dist', 'main.html');
+    let f = path.resolve(__dirname, '..', 'dist', 'index.html');
     res.sendFile(f);
 });
 
