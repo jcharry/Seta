@@ -80,7 +80,7 @@ module.exports = {
                 loader: 'url-loader?limit=8192'
             },
             {
-                test: /\.mp4$/,
+                test: /\.(mp4|mov)$/,
                 loader: 'url-loader?limit=10000&mimetype=video/mp4'
             }
         ]
